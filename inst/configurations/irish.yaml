@@ -1,0 +1,58 @@
+configuration: v0.3.0
+image_list:
+  tox_levels:
+  - 0.0
+  - 10.0
+  - 30.0
+  - 80.0
+  forecast_steps: 1.0
+  n_steps: 2.0
+  minimum_gap: 4.0
+  maximum_gap: 10.0
+  multisample_weeks: 'last'
+  toxins:
+  - gtx14
+  - gtx23
+  - dcgtx23
+  - gtx5
+  - neo
+  - dcstx
+  - stx
+  - c12
+model:
+  balance_val_set: no
+  downsample: no
+  use_class_weights: no
+  dropout1: 0.3
+  dropout2: 0.3
+  batch_size: 32.0
+  units1: 32.0
+  units2: 32.0
+  epochs: 128.0
+  validation_split: 0.2
+  shuffle: yes
+  num_classes: 4.0
+  optimizer: adam
+  loss_function: categorical_crossentropy
+  model_metrics: categorical_accuracy
+train_test:
+  split_by: year
+  train:
+  - '2014'
+  - '2015'
+  - '2016'
+  - '2017'
+  - '2018'
+  - '2019'
+  - '2020'
+  - '2021'
+  - '2022'
+  - '2023'
+  - '2024'
+  test: 
+  - 'IRISH_2019'
+  - 'IRISH_2020'
+  - 'IRISH_2021'
+  - 'IRISH_2022'
+  - 'IRISH_2023'
+  - 'IRISH_2024'

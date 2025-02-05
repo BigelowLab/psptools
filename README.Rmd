@@ -1,0 +1,124 @@
+---
+title: "psptools"
+output: github_document
+---
+
+Tools for making shellfish toxicity forecasts using past toxicity measurements and associated environmental observation data
+
+# Requirements
+
+### [Tensorflow](https://tensorflow.rstudio.com/) and [Keras](https://tensorflow.rstudio.com/guides/keras/basics)
+
+To run this package, you will need Tensorflow, Keras and all of their dependencies installed and configured on your machine. 
+
+For first time Keras users, follow these steps to setup your machine for running the psptools software:
+
+```
+install.packages("keras")
+library(reticulate)
+virtualenv_create("r-reticulate", python=install_python())
+
+library(keras)
+install_keras(envname = "r-reticulate")
+```
+
+### Packages from CRAN
+
+  + [rlang](https://CRAN.R-project.org/package=rlang)
+
+  + [dplyr](https://CRAN.R-project.org/package=dplyr)
+
+  + [yaml](https://CRAN.R-project.org/package=yaml)
+  
+  + [abind](https://CRAN.R-project.org/package=abind)
+  
+  + [keras](https://keras.rstudio.com/index.html)
+  
+  + [ggplot2](https://CRAN.R-project.org/package=ggplot2)
+  
+  + [stats](https://CRAN.R-project.org/package=stats)
+
+### Installation
+
+```
+remotes::install_github("BigelowLab/psptools")
+```
+
+# Usage
+
+Here we provide a brief demonstration of going from raw input data to a forecast of shellfish toxicity measurements. For full documentation of each step, please refer to [psptools-guide](https://bigelowlab.github.io/psptools-guide/).
+
+### Input data
+
+Prepare your input data for transforming into model input. The input table must have the columns: 
+
+ + The date each toxicity measurement was taken (date)
+ 
+ + A unique location identifier where the sample was taken (location_id)
+ 
+ + The total measured toxicity which will be used to predict (total_toxicity)
+ 
+ + Individual columns used for model input (12 congners - gtx4, gtx1, etc...)
+
+
+
+```{r}
+library(pspdata)
+
+input_data <- read_psp_data(model_ready=TRUE)
+
+input_data
+```
+
+### Configuration
+
+Read in a configuration that defines the input data shape, model architecture and details of the test. In this example, we'll run a test using samples made up of 2 measurements that are between 4-10 days apart to predict one measurement ahead. Total toxicity will be binned into four classes using the breaks 10, 30 and 80 (psp units), and twelve saxitoxin congeners will be used from each measurement. The model will train on data from 2014-2023 and test on 2024. 
+
+```{r}
+library(psptools)
+
+cfg <- read_config(filename="test_2024.yaml")
+
+cfg
+```
+
+### Model input
+
+Go from raw input data to seperate traning and testing sets containing samples made up of consecutive toxicity measurements and their resulting toxicity n steps ahead
+
+```{r}
+model_input <- transform_data(cfg, input_data, forecast_mode=FALSE)
+
+str(model_input)
+```
+
+### Model training and prediction
+
+```{r results='hide'}
+model <- forecast_model(cfg, model_input, forecast_mode=FALSE)
+```
+
+### Make a forecast list
+
+Combine all of the predictions the model made into a table with their metadata
+
+```{r}
+forecast_list <- make_forecast_list(cfg, model$forecast, forecast_mode = FALSE)
+  
+forecast_list
+```
+
+### Model skill
+
+```{r}
+metrics = forecast_metrics(forecast_list)
+
+metrics
+```
+
+A confusion matrix can help to visualize multiclass acurracy
+
+```{r}
+make_confusion_matrix(cfg, forecast_list)
+```
+
