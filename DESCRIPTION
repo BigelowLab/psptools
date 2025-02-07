@@ -19,5 +19,6 @@ Imports:
   keras,
   abind,
   ggplot2,
-  stats
+  stats,
+  readr
 RoxygenNote: 7.3.2

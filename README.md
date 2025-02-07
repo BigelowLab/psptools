@@ -37,6 +37,8 @@ running the psptools software:
 
 - [stats](https://CRAN.R-project.org/package=stats)
 
+- [readr](https://CRAN.R-project.org/package=readr)
+
 ### Installation
 
     remotes::install_github("BigelowLab/psptools")
@@ -213,20 +215,20 @@ str(model_input)
 
     ## List of 2
     ##  $ train:List of 7
-    ##   ..$ labels         : num [1:7421, 1:4] 1 1 1 0 0 1 1 1 1 0 ...
+    ##   ..$ labels         : num [1:7421, 1:4] 1 1 1 1 1 1 0 1 1 1 ...
     ##   ..$ image          : num [1:7421, 1:24] 0 0 0 0 0 0 0 0 0 0 ...
-    ##   ..$ classifications: num [1:7421] 0 0 0 3 2 0 0 0 0 3 ...
-    ##   ..$ toxicity       : num [1:7421] 0.579 0 0 83.957 45.657 ...
-    ##   ..$ locations      : chr [1:7421] "PSP15.25" "PSP10.07" "PSP27.37" "PSP16.321" ...
-    ##   ..$ dates          : num [1:7421] 19116 16666 16664 17309 17294 ...
+    ##   ..$ classifications: num [1:7421] 0 0 0 0 0 0 1 0 0 0 ...
+    ##   ..$ toxicity       : num [1:7421] 0 0 0.358 0 1.372 ...
+    ##   ..$ locations      : chr [1:7421] "PSP15.25" "PSP24.08" "PSP16.41" "PSP14.17" ...
+    ##   ..$ dates          : num [1:7421] 18436 18841 19165 17316 18470 ...
     ##   ..$ scaling_factors: NULL
     ##  $ test :List of 7
-    ##   ..$ labels         : num [1:341, 1:4] 1 1 1 1 1 1 1 0 1 1 ...
-    ##   ..$ image          : num [1:341, 1:24] 0 0 0 0 0 0 0 0 0 0 ...
-    ##   ..$ classifications: num [1:341] 0 0 0 0 0 0 0 1 0 0 ...
-    ##   ..$ toxicity       : num [1:341] 6.502 3.345 0.608 0.169 4.086 ...
-    ##   ..$ locations      : chr [1:341] "PSP26.07" "PSP15.25" "PSP12.28" "PSP27.05" ...
-    ##   ..$ dates          : num [1:341] 19906 19858 19934 19871 19898 ...
+    ##   ..$ labels         : num [1:341, 1:4] 1 0 0 1 1 1 1 0 1 1 ...
+    ##   ..$ image          : num [1:341, 1:24] 0 0 0 0 0.377 ...
+    ##   ..$ classifications: num [1:341] 0 2 1 0 0 0 0 1 0 0 ...
+    ##   ..$ toxicity       : num [1:341] 7.33 71.69 12.76 5.69 4.67 ...
+    ##   ..$ locations      : chr [1:341] "PSP15.25" "PSP11.115" "PSP10.145" "PSP12.28" ...
+    ##   ..$ dates          : num [1:341] 19913 19856 19898 19904 19905 ...
     ##   ..$ scaling_factors: NULL
 
 ### Model training and prediction
@@ -248,18 +250,18 @@ forecast_list
 
     ## # A tibble: 341 × 13
     ## # Rowwise: 
-    ##    version location date       class_bins forecast_start_date forecast_end_date
-    ##    <chr>   <chr>    <date>     <chr>      <date>              <date>           
-    ##  1 v0.3.1  PSP26.07 2024-07-02 0,10,30,80 2024-07-06          2024-07-12       
-    ##  2 v0.3.1  PSP15.25 2024-05-15 0,10,30,80 2024-05-19          2024-05-25       
-    ##  3 v0.3.1  PSP12.28 2024-07-30 0,10,30,80 2024-08-03          2024-08-09       
-    ##  4 v0.3.1  PSP27.05 2024-05-28 0,10,30,80 2024-06-01          2024-06-07       
-    ##  5 v0.3.1  PSP10.29 2024-06-24 0,10,30,80 2024-06-28          2024-07-04       
-    ##  6 v0.3.1  PSP11.1  2024-07-01 0,10,30,80 2024-07-05          2024-07-11       
-    ##  7 v0.3.1  PSP21.09 2024-08-07 0,10,30,80 2024-08-11          2024-08-17       
-    ##  8 v0.3.1  PSP10.33 2024-07-23 0,10,30,80 2024-07-27          2024-08-02       
-    ##  9 v0.3.1  PSP25.06 2024-06-25 0,10,30,80 2024-06-29          2024-07-05       
-    ## 10 v0.3.1  PSP15.2  2024-07-02 0,10,30,80 2024-07-06          2024-07-12       
+    ##    version location  date       class_bins forecast_start_date forecast_end_date
+    ##    <chr>   <chr>     <date>     <chr>      <date>              <date>           
+    ##  1 v0.3.1  PSP15.25  2024-07-09 0,10,30,80 2024-07-13          2024-07-19       
+    ##  2 v0.3.1  PSP11.115 2024-05-13 0,10,30,80 2024-05-17          2024-05-23       
+    ##  3 v0.3.1  PSP10.145 2024-06-24 0,10,30,80 2024-06-28          2024-07-04       
+    ##  4 v0.3.1  PSP12.28  2024-06-30 0,10,30,80 2024-07-04          2024-07-10       
+    ##  5 v0.3.1  PSP10.2   2024-07-01 0,10,30,80 2024-07-05          2024-07-11       
+    ##  6 v0.3.1  PSP11.17  2024-05-29 0,10,30,80 2024-06-02          2024-06-08       
+    ##  7 v0.3.1  PSP12.003 2024-07-15 0,10,30,80 2024-07-19          2024-07-25       
+    ##  8 v0.3.1  PSP10.33  2024-06-24 0,10,30,80 2024-06-28          2024-07-04       
+    ##  9 v0.3.1  PSP24.08  2024-05-27 0,10,30,80 2024-05-31          2024-06-06       
+    ## 10 v0.3.1  PSP25.06  2024-05-21 0,10,30,80 2024-05-25          2024-05-31       
     ## # ℹ 331 more rows
     ## # ℹ 7 more variables: actual_class <dbl>, actual_toxicity <dbl>, prob_0 <dbl>,
     ## #   prob_1 <dbl>, prob_2 <dbl>, prob_3 <dbl>, predicted_class <dbl>
@@ -275,7 +277,7 @@ metrics
     ## # A tibble: 1 × 10
     ##      tp    fp    tn    fn accuracy cl_accuracy   f_1 precision sensitivity
     ##   <int> <int> <int> <int>    <dbl>       <dbl> <dbl>     <dbl>       <dbl>
-    ## 1     4     5   327     5    0.701       0.971 0.444     0.444       0.444
+    ## 1     2     3   329     7    0.716       0.971 0.286       0.4       0.222
     ## # ℹ 1 more variable: specificity <dbl>
 
 A confusion matrix can help to visualize multiclass acurracy
