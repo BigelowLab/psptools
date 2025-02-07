@@ -4,7 +4,9 @@ Title: PSP Forecasting Software
 Version: 0.3
 Authors@R: c(
   person("Johnathan", "Evanilla", role = c("cre", "aut"), email = "jevanilla@bigelow.org"),
-  person("Ben", "Tupper", role = c("aut"), email = "btupper@bigelow.org")
+  person("Ben", "Tupper", role = c("aut"), email = "btupper@bigelow.org"),
+  person("Nick", "Record", role = c("aut"), email = "nrecord@bigelow.org"),
+  person("Bigelow Laboratory for Ocean Sciences", role = c("cph"))
   )
 Description: Software for predicting shellfish biotoxin monitoring data using machine-learning models.
 License: MIT + file LICENSE
