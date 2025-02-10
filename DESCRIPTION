@@ -1,7 +1,7 @@
 Package: psptools
 Type: Package
 Title: PSP Forecasting Software
-Version: 0.3
+Version: 1.0
 Authors@R: c(
   person("Johnathan", "Evanilla", role = c("cre", "aut"), email = "jevanilla@bigelow.org"),
   person("Ben", "Tupper", role = c("aut"), email = "btupper@bigelow.org"),
@@ -11,7 +11,8 @@ Authors@R: c(
 Description: Software for predicting shellfish biotoxin monitoring data using machine-learning models.
 License: MIT + file LICENSE
 Encoding: UTF-8
-URL: https://github.com/BigelowLab/psptools
+URL: https://bigelowlab.github.io/psptools-guide/, https://github.com/BigelowLab/psptools
+Bugreports: https://github.com/BigelowLab/psptools/issues
 Depends:
   R (>= 4.0)
 Imports:
