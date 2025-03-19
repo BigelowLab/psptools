@@ -21,7 +21,7 @@ make_confusion_matrix <- function(cfg, forecast_list) {
                                       mapping = ggplot2::aes(x = .data$predicted, y = .data$actual)) +
     ggplot2::geom_tile(ggplot2::aes(fill = log(.data$Freq+1))) +
     ggplot2::geom_text(ggplot2::aes(label = sprintf("%1.0f", .data$Freq)), vjust = 1, size=8) +
-    ggplot2::geom_text(ggplot2::aes(label = paste(.data$frac, "%", sep="")), vjust = 4, size=4)+
+    #ggplot2::geom_text(ggplot2::aes(label = paste(.data$frac, "%", sep="")), vjust = 4, size=4)+
     ggplot2::scale_fill_gradient(low = "white", 
                                  high = "blue") +
     ggplot2::labs(x = "Predicted Classifications", 

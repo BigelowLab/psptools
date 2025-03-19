@@ -1,4 +1,4 @@
-#' Function to take predictions from multiple model runs and combine them into an ensemble forecast
+#' Transforms predictions from ensemble model test runs and combines them into an ensemble forecast with metrics
 #' 
 #' @param cfg a configuration list
 #' @param predictions a table of predictions where each site-date has multiple entries
@@ -8,7 +8,6 @@
 make_ensemble_forecast <- function(cfg, predictions) {
   
   site_forecast <- function(tbl, key) {
-    
     forecast_list <- dplyr::tibble(location = tbl$location[1],
                                    date = tbl$date[1],
                                    p_0 = round(mean(tbl$prob_0)),
@@ -21,7 +20,6 @@ make_ensemble_forecast <- function(cfg, predictions) {
                                    actual_class = tbl$actual_class[1],
                                    actual_toxicity = tbl$actual_toxicity[1]) |> 
       dplyr::mutate(predicted_class = which.max(c(.data$p_0, .data$p_1, .data$p_2, .data$p_3)) - 1)
-    
   }
   
   ensemble_forecast <- predictions |> 
@@ -30,35 +28,7 @@ make_ensemble_forecast <- function(cfg, predictions) {
     dplyr::bind_rows() |> 
     dplyr::arrange(.data$date, .data$location)
   
-  tp <- ensemble_forecast |> 
-    dplyr::filter(.data$predicted_class == 3 & .data$actual_class == 3) |> 
-    nrow()
-  
-  fp <- ensemble_forecast |> 
-    dplyr::filter(.data$predicted_class == 3 & .data$actual_class != 3) |> 
-    nrow()
-  
-  precision = tp/(tp+fp)
-  
-  fn = ensemble_forecast |> 
-    dplyr::filter(.data$predicted_class != 3 & .data$actual_class == 3) |> 
-    nrow()
-  
-  recall = tp/(tp+fn)
-  
-  f_1 = (2)*(precision*recall)/(precision+recall)
-  
-  
-  ensemble_metrics <- dplyr::tibble(version = cfg$configuration,
-                                    test_year = cfg$train_test$test,
-                                    accuracy = nrow(ensemble_forecast |> dplyr::filter(.data$actual_class == .data$predicted_class))/nrow(ensemble_forecast),
-                                    f_1,
-                                    recall = recall,
-                                    precision = precision,
-                                    tp = tp,
-                                    fp = fp,
-                                    fn = fn)
-  
+  ensemble_metrics <- forecast_metrics(ensemble_forecast)
   
   z <- list(metrics = ensemble_metrics,
             predictions = ensemble_forecast)

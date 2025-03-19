@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_ensemble_forecast.R
 \name{make_ensemble_forecast}
 \alias{make_ensemble_forecast}
-\title{Function to take predictions from multiple model runs and combine them into an ensemble forecast}
+\title{Transforms predictions from ensemble model test runs and combines them into an ensemble forecast with metrics}
 \usage{
 make_ensemble_forecast(cfg, predictions)
 }
@@ -15,5 +15,5 @@ make_ensemble_forecast(cfg, predictions)
 a list containing a table of predictions where each site-date has one prediction and metrics
 }
 \description{
-Function to take predictions from multiple model runs and combine them into an ensemble forecast
+Transforms predictions from ensemble model test runs and combines them into an ensemble forecast with metrics
 }
