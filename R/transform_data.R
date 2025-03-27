@@ -1,9 +1,10 @@
 #' Takes raw data and transforms it to be ready for model input
+#' wraps `make_image_list()` and `pool_images_and_labels()` into one function
 #' 
 #' @param cfg model configuration file
-#' @param input_data a tibble of input samples where each row is a sample and each colum is a feature
+#' @param input_data a tibble of input samples where each row is a sample and each column is a feature
 #' @param forecast_mode logical, if true, creates new dummy rows for each station to generate a forecast
-#' @return two lists for forecast model input training and testing data
+#' @returns two lists for forecast model input training and testing data. each list contains:
 #' \itemize{
 #' \item{labels}
 #' \item{image}
@@ -39,6 +40,9 @@ transform_data <- function(cfg,
                                 toxins =         cfg$image_list$toxins,
                                 environmentals = cfg$image_list$environmentals)
   
+  ## splitting by custom train/test splitting functions
+  #split_fun <- get(cfg$train_test$split_by)
+  #image_list <- split_fun(cfg, image_list)
   
   if (tolower(cfg$train_test$split_by) == "fraction") {
     
@@ -85,7 +89,6 @@ transform_data <- function(cfg,
                       val = val,
                       test = test)
   } else {
-    
     train <- pool_images_and_labels(image_list[TRAIN], 
                                     cfg = cfg, 
                                     downsample =cfg$model$downsample,

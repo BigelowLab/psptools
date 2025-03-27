@@ -76,19 +76,17 @@ make_image_list <- function(raw_data,
                     toxicity =       image_batch$total_toxicity[n_steps+forecast_steps],
                     date =           image_batch$date[n_steps],
                     image =          image[1:n_steps,])
-          
         }
-        
         return(z)
       }
     }
     
     if (nrow(tbl) < (n_steps+forecast_steps)) {
-      return(NULL)
+      return(NULL) 
     }
     
-    nbatches <- n_batches(nrow(tbl), (n_steps+forecast_steps))
-    batches <- compute_batches(nbatches, (n_steps+forecast_steps))
+    nbatches <- n_batches(nrow(tbl), (n_steps+forecast_steps))      # how many images can we make?
+    batches <- compute_batches(nbatches, (n_steps+forecast_steps))  # define the indices of each image
     
     xx <- lapply(batches, make_images, tbl, forecast_steps, n_steps, minimum_gap, maximum_gap, toxins, environmentals)
     gap_verified <- sapply(xx, function(x){return(x$status)})
@@ -104,5 +102,4 @@ make_image_list <- function(raw_data,
     unlist(recursive = FALSE)
   
   return(image_list)
-  
 }
