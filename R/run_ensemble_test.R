@@ -49,14 +49,18 @@ run_ensemble_test <- function(cfg,
   confusion_matrix <- make_confusion_matrix(cfg, ensemble_forecast$predictions)
   
   p3_v_tox_ens <- ggplot2::ggplot(data=ensemble_forecast$predictions, ggplot2::aes(x = .data$p_3, y = .data$actual_toxicity)) +
-    ggplot2::geom_point(ggplot2::aes(alpha = 0.4)) +
-    ggplot2::geom_hline(yintercept = 80) +
-    ggplot2::ggtitle("Probability of Class 3 vs Actual Toxicity - Ensemble Forecast")
+    ggplot2::geom_point(alpha = 0.4) +
+    ggplot2::geom_hline(yintercept = 80, linetype="dashed") +
+    ggplot2::ggtitle("Probability of Class 3 vs Actual Toxicity - Ensemble Predictions") +
+    ggplot2::labs(x = "Probability of closure-level toxicity",
+                  y = "Measured PSP toxicity")
   
   
   p3_v_class_ens <- ggplot2::ggplot(data=ensemble_forecast$predictions, ggplot2::aes(x = .data$p_3, y = .data$actual_class)) +
-    ggplot2::geom_point(ggplot2::aes(alpha = 0.4)) +
-    ggplot2::ggtitle("Probability of Class 3 vs Actual Class - Ensemble Forecast")
+    ggplot2::geom_hline(yintercept = 80, linetype="dashed") +
+    ggplot2::ggtitle("Probability of Class 3 vs Actual Class - Ensemble Predictions") +
+    ggplot2::labs(x = "Probability of closure-level toxicity",
+                  y = "Measured PSP classification")
   
   if (write_results) {
     readr::write_csv(run_metrics, "individual_test_results.csv.gz", append=TRUE)
