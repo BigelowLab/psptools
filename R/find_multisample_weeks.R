@@ -15,6 +15,10 @@ find_multisample_weeks <- function(data,
   # fixes multisample weeks (msw) using specified method in mode
   fix_msw <- function(tbl, key, mode) {
     
+    if (nrow(tbl) > 1) {
+      cat(paste(key$location_id, key$year, key$week, key$species, nrow(tbl), sep=" "), "\n")
+    }
+    
     if (mode == "first") {
       tbl <- tbl |>
         dplyr::filter(.data$date == min(.data$date))
@@ -38,8 +42,9 @@ find_multisample_weeks <- function(data,
   }
   
   r <- data |>
-    dplyr::mutate(week = date_to_week(date), .after=date) |>
-    dplyr::group_by(.data$location_id, .data$year, .data$week) |>
+    #dplyr::mutate(week = date_to_week(date), .after=date) |> 
+    dplyr::mutate(week = format(date, format="%U")) |>
+    dplyr::group_by(.data$location_id, .data$year, .data$week, .data$species) |>
     dplyr::group_map(fix_msw, mode, .keep=TRUE) |>
     dplyr::bind_rows() |>
     compute_gap()

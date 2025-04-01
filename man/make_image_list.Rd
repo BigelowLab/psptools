@@ -38,9 +38,10 @@ each list is an image along with its associated data (location_id, date, etc.)
 \item{status logical if the image passes the image gap criteria (gap >= minimum_gap & gap <= maximum_gap)}
 \item{year the year the image is from}
 \item{location_id the sampling station id}
+\item{species the shellfish species the image was made for}
+\item{date the date of the final row in the image (the forecast is for forecast_steps ahead of this date)}
 \item{toxixty the total toxicity used to regress on instead of classify a binned toxicity}
 \item{classification the classification (0:num_classes) of the final row in the image}
-\item{date the date of the final row in the image (the forecast is for forecast_steps ahead of this date)}
 \item{image a 2 dimensional array with the dimensions (n_steps + forecast steps) x length(toxins + environmentals)}
 }
 }

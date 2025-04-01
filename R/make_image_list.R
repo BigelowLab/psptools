@@ -13,9 +13,10 @@
 #' \item{status logical if the image passes the image gap criteria (gap >= minimum_gap & gap <= maximum_gap)}
 #' \item{year the year the image is from}
 #' \item{location_id the sampling station id}
+#' \item{species the shellfish species the image was made for}
+#' \item{date the date of the final row in the image (the forecast is for forecast_steps ahead of this date)}
 #' \item{toxixty the total toxicity used to regress on instead of classify a binned toxicity}
 #' \item{classification the classification (0:num_classes) of the final row in the image}
-#' \item{date the date of the final row in the image (the forecast is for forecast_steps ahead of this date)}
 #' \item{image a 2 dimensional array with the dimensions (n_steps + forecast steps) x length(toxins + environmentals)}
 #' }
 #' 
@@ -64,17 +65,19 @@ make_image_list <- function(raw_data,
           z <- list(status=          TRUE,
                     year =           "FORECAST_IMAGE",
                     location_id =    image_batch$location_id[1],
+                    species =        image_batch$species[1],
+                    date =           image_batch$date[n_steps],
                     classification = image_batch$classification[n_steps+forecast_steps],
                     toxicity =       image_batch$total_toxicity[n_steps+forecast_steps],
-                    date =           image_batch$date[n_steps],
                     image =          image[1:n_steps,])
         } else {
           z <- list(status=          TRUE,
                     year =           image_batch$year[1],
                     location_id =    image_batch$location_id[1],
+                    species =        image_batch$species[1],
+                    date =           image_batch$date[n_steps],
                     classification = image_batch$classification[n_steps+forecast_steps],
                     toxicity =       image_batch$total_toxicity[n_steps+forecast_steps],
-                    date =           image_batch$date[n_steps],
                     image =          image[1:n_steps,])
         }
         return(z)
@@ -97,7 +100,7 @@ make_image_list <- function(raw_data,
   }
   
   image_list <- normalized_data |>
-    dplyr::group_by(.data$location_id, .data$year) |>
+    dplyr::group_by(.data$location_id, .data$year, .data$species) |>
     dplyr::group_map(find_images, forecast_steps, n_steps, minimum_gap, maximum_gap, toxins, environmentals, .keep=TRUE) |> 
     unlist(recursive = FALSE)
   

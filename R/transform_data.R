@@ -21,7 +21,7 @@ transform_data <- function(cfg,
                            forecast_mode = FALSE) {
   
   # Log inputs to even distribution
-  # Handle multisampled weeks
+  # Handle multi-sampled weeks
   data <- input_data |> 
     log_inputs(cfg) |>
     find_multisample_weeks(mode = cfg$image_list$multisample_weeks)
