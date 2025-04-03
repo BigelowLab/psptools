@@ -24,3 +24,20 @@ read_config <- function(filename, autopopulate = "num_classes", old=FALSE){
   
   return(config)
 }
+
+
+#' Tests if required configuration options are present
+#' @param cfg a psptools configuration
+#' @returns NULL if pass or error if fail
+#' @export
+is_cfg_valid <- function(cfg) {
+  if (any(is.null(cfg$train_test$train$species),
+          is.null(cfg$train_test$train$region),
+          is.null(cfg$train_test$train$year),
+          is.null(cfg$train_test$test$species),
+          is.null(cfg$train_test$test$region),
+          is.null(cfg$train_test$test$year))) {
+    stop("Configuration object `cfg` must contain values for species, region and year for both train and test. 
+         See https://bigelowlab.github.io/psptools-guide/configuration_files for more information")
+  }
+}

@@ -4,33 +4,12 @@
 \alias{make_image_list}
 \title{Takes raw input data, filters for image criteria and creates images with dimensions (n_steps + forecast steps) x length(toxins + environmentals)}
 \usage{
-make_image_list(
-  raw_data,
-  tox_levels,
-  forecast_steps,
-  n_steps,
-  minimum_gap,
-  maximum_gap,
-  toxins,
-  environmentals
-)
+make_image_list(raw_data, cfg)
 }
 \arguments{
 \item{raw_data}{database with toxin measurements with their date sampled, location, shellfish species and additional environmental data}
 
-\item{tox_levels}{toxin level categories used for classifying total toxicity}
-
-\item{forecast_steps}{the number of weeks ahead of the image the forecast is made for}
-
-\item{n_steps}{the number of weeks of samples in an image}
-
-\item{minimum_gap}{the smallest gap between samples allowed into an image}
-
-\item{maximum_gap}{the largest gap between samples allowed into an image}
-
-\item{toxins}{list of individual paralytic toxin names (12) for toxin columns}
-
-\item{environmentals}{environmental variables}
+\item{cfg}{psptools configuration}
 }
 \value{
 each list is an image along with its associated data (location_id, date, etc.)

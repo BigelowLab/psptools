@@ -28,11 +28,7 @@ pool_images_and_labels <- function(image_list_subset,
                                    downsample=FALSE,
                                    upsample=FALSE) {
   
-  if (cfg$train_test$split_by == "year") {
-    xx <- unlist(image_list_subset, recursive = FALSE) 
-  } else {
-    xx <- image_list_subset
-  }
+  xx <- image_list_subset
   
   if (upsample == TRUE) {
     xx <- upsample(xx)
@@ -69,13 +65,17 @@ pool_images_and_labels <- function(image_list_subset,
   dates <- sapply(xx, function(x){return(x$date)})
   attr(dates, "names") <- NULL
   
-  toxicity = sapply(xx, function(x){x$toxicity})
+  toxicity <- sapply(xx, function(x){x$toxicity})
   attr(toxicity, "names") <- NULL
+  
+  species <- sapply(xx, function(x){x$species})
+  attr(species, "names") <- NULL
   
   r <- list(labels = labels, 
             image = image, 
             classifications = classifications,
             toxicity = toxicity,
+            species = species,
             locations = locations,
             dates = dates,
             scaling_factors = scaling_factors)

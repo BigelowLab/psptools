@@ -15,9 +15,9 @@ find_multisample_weeks <- function(data,
   # fixes multisample weeks (msw) using specified method in mode
   fix_msw <- function(tbl, key, mode) {
     
-    if (nrow(tbl) > 1) {
-      cat(paste(key$location_id, key$year, key$week, key$species, nrow(tbl), sep=" "), "\n")
-    }
+    #if (nrow(tbl) > 1) {
+    #  cat(paste(key$location_id, key$year, key$week, key$species, nrow(tbl), sep=" "), "\n")
+    #}
     
     if (mode == "first") {
       tbl <- tbl |>

@@ -31,76 +31,93 @@ transform_data <- function(cfg,
     data <- forecast_dummy(data)
   }
   
-  image_list <- make_image_list(raw_data = data,
-                                tox_levels =     cfg$image_list$tox_levels,
-                                forecast_steps = cfg$image_list$forecast_steps,
-                                n_steps =        cfg$image_list$n_steps,
-                                minimum_gap =    cfg$image_list$minimum_gap,
-                                maximum_gap =    cfg$image_list$maximum_gap,
-                                toxins =         cfg$image_list$toxins,
-                                environmentals = cfg$image_list$environmentals)
+  is_cfg_valid(cfg)
+  
+  train_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$train$year & 
+                                          .data$species %in% cfg$train_test$train$species & 
+                                          .data$region %in% cfg$train_test$train$region) |>
+    make_image_list(cfg) |>
+    pool_images_and_labels(cfg)
+  
+  test_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$test$year & 
+                                         .data$species %in% cfg$train_test$test$species & 
+                                         .data$region %in% cfg$train_test$test$region) |>
+    make_image_list(cfg) |>
+    pool_images_and_labels(cfg)
+  
+  processed <- list(train = train_data,
+                    test = test_data)
   
   ## splitting by custom train/test splitting functions
   #split_fun <- get(cfg$train_test$split_by)
   #image_list <- split_fun(cfg, image_list)
   
-  if (tolower(cfg$train_test$split_by) == "fraction") {
-    
-    # creates indices for all images to randomly sample for train/test sets
-    imgs <- seq(1, length(image_list))
-    test_n <- round(length(imgs)*cfg$train_test$test_fraction)
-    
-    set.seed(seed=cfg$train_test$seed)
-    
-    TEST <- sample(imgs, test_n)
-    
-    TRAIN <- setdiff(imgs, TEST)
-    
-  } else if (tolower(cfg$train_test$split_by) == "year") {
-    
-    #Splits image_list by year for grouping into train/test data
-    years <- sapply(image_list, function(x) {return(x$year)})
-    image_list <- split(image_list, years)
-    
-    #configuration
-    TRAIN <-   cfg$train_test$train
-    TEST <-    cfg$train_test$test
-    
-  } else {
-    stop("split_by value not known: ", cfg$train_test$split_by)
-  }
+  #image_list <- make_image_list(raw_data = data,
+  #                              tox_levels =     cfg$image_list$tox_levels,
+  #                              forecast_steps = cfg$image_list$forecast_steps,
+  #                              n_steps =        cfg$image_list$n_steps,
+  #                              minimum_gap =    cfg$image_list$minimum_gap,
+  #                              maximum_gap =    cfg$image_list$maximum_gap,
+  #                              toxins =         cfg$image_list$toxins,
+  #                              environmentals = cfg$image_list$environmentals)
+  
+  #if (tolower(cfg$train_test$split_by) == "fraction") {
+  #  
+  #  # creates indices for all images to randomly sample for train/test sets
+  #  imgs <- seq(1, length(image_list))
+  #  test_n <- round(length(imgs)*cfg$train_test$test_fraction)
+  #  
+  #  set.seed(seed=cfg$train_test$seed)
+  #  
+  #  TEST <- sample(imgs, test_n)
+  #  
+  #  TRAIN <- setdiff(imgs, TEST)
+  #  
+  #} else if (tolower(cfg$train_test$split_by) == "year") {
+  #  
+  #  #Splits image_list by year for grouping into train/test data
+  #  years <- sapply(image_list, function(x) {return(x$year)})
+  #  image_list <- split(image_list, years)
+  #  
+  #  #configuration
+  #  TRAIN <-   cfg$train_test$train
+  #  TEST <-    cfg$train_test$test
+  #  
+  #} else {
+  #  stop("split_by value not known: ", cfg$train_test$split_by)
+  #}
   
 
-  if (cfg$model$balance_val_set == TRUE) {
-    train_val_split <- validation_splitter(image_list[TRAIN], cfg)
-    
-    #Group the training and testing data
-    train <- pool_images_and_labels(train_val_split$train, 
-                                    cfg = cfg, 
-                                    downsample=cfg$model$downsample)
-    
-    val <- pool_images_and_labels(train_val_split$val,
-                                  cfg = cfg)
-    
-    test <- pool_images_and_labels(image_list[TEST], 
-                                   cfg = cfg)
-    
-    processed <- list(train = train,
-                      val = val,
-                      test = test)
-  } else {
-    train <- pool_images_and_labels(image_list[TRAIN], 
-                                    cfg = cfg, 
-                                    downsample =cfg$model$downsample,
-                                    upsample = FALSE)
-    
-    test <- pool_images_and_labels(image_list[TEST], 
-                                   cfg = cfg,
-                                   upsample = FALSE)
-    
-    processed <- list(train = train,
-                      test = test)
-  }
+  #if (cfg$model$balance_val_set == TRUE) {
+  #  train_val_split <- validation_splitter(image_list[TRAIN], cfg)
+  #  
+  #  #Group the training and testing data
+  #  train <- pool_images_and_labels(train_val_split$train, 
+  #                                  cfg = cfg, 
+  #                                  downsample=cfg$model$downsample)
+  #  
+  #  val <- pool_images_and_labels(train_val_split$val,
+  #                                cfg = cfg)
+  #  
+  #  test <- pool_images_and_labels(image_list[TEST], 
+  #                                 cfg = cfg)
+  #  
+  #  processed <- list(train = train,
+  #                    val = val,
+  #                    test = test)
+  #} else {
+  #  train <- pool_images_and_labels(image_list[TRAIN], 
+  #                                  cfg = cfg, 
+  #                                  downsample =cfg$model$downsample,
+  #                                  upsample = FALSE)
+  #  
+  #  test <- pool_images_and_labels(image_list[TEST], 
+  #                                 cfg = cfg,
+  #                                 upsample = FALSE)
+  #  
+  #  processed <- list(train = train,
+  #                    test = test)
+  #}
 
   return(processed)
 }
