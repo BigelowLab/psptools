@@ -10,6 +10,7 @@
 #' \item{image}
 #' \item{classifications}
 #' \item{toxicity}
+#' \item{species}
 #' \item{locations}
 #' \item{dates}
 #' \item{scaling_factors}
@@ -31,63 +32,49 @@ transform_data <- function(cfg,
     data <- forecast_dummy(data)
   }
   
-  is_cfg_valid(cfg)
-  
-  train_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$train$year & 
-                                          .data$species %in% cfg$train_test$train$species & 
-                                          .data$region %in% cfg$train_test$train$region) |>
-    make_image_list(cfg) |>
-    pool_images_and_labels(cfg)
-  
-  test_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$test$year & 
-                                         .data$species %in% cfg$train_test$test$species & 
-                                         .data$region %in% cfg$train_test$test$region) |>
-    make_image_list(cfg) |>
-    pool_images_and_labels(cfg)
-  
-  processed <- list(train = train_data,
-                    test = test_data)
-  
-  ## splitting by custom train/test splitting functions
-  #split_fun <- get(cfg$train_test$split_by)
-  #image_list <- split_fun(cfg, image_list)
-  
-  #image_list <- make_image_list(raw_data = data,
-  #                              tox_levels =     cfg$image_list$tox_levels,
-  #                              forecast_steps = cfg$image_list$forecast_steps,
-  #                              n_steps =        cfg$image_list$n_steps,
-  #                              minimum_gap =    cfg$image_list$minimum_gap,
-  #                              maximum_gap =    cfg$image_list$maximum_gap,
-  #                              toxins =         cfg$image_list$toxins,
-  #                              environmentals = cfg$image_list$environmentals)
-  
-  #if (tolower(cfg$train_test$split_by) == "fraction") {
-  #  
-  #  # creates indices for all images to randomly sample for train/test sets
-  #  imgs <- seq(1, length(image_list))
-  #  test_n <- round(length(imgs)*cfg$train_test$test_fraction)
-  #  
-  #  set.seed(seed=cfg$train_test$seed)
-  #  
-  #  TEST <- sample(imgs, test_n)
-  #  
-  #  TRAIN <- setdiff(imgs, TEST)
-  #  
-  #} else if (tolower(cfg$train_test$split_by) == "year") {
-  #  
-  #  #Splits image_list by year for grouping into train/test data
-  #  years <- sapply(image_list, function(x) {return(x$year)})
-  #  image_list <- split(image_list, years)
-  #  
-  #  #configuration
-  #  TRAIN <-   cfg$train_test$train
-  #  TEST <-    cfg$train_test$test
-  #  
-  #} else {
-  #  stop("split_by value not known: ", cfg$train_test$split_by)
+  if (tolower(cfg$train_test$split_by) == "year_region_species") {
+    is_cfg_valid(cfg)
+    
+    test_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$test$year & 
+                                 .data$species %in% cfg$train_test$test$species &
+                                 .data$region %in% cfg$train_test$test$region)
+    
+    test <- make_image_list(test_data, cfg) |>
+      pool_images_and_labels(cfg)
+    
+    train_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$train$year & 
+                                  .data$species %in% cfg$train_test$train$species & 
+                                  .data$region %in% cfg$train_test$train$region &
+                                  !.data$id %in% test_data$id)
+    
+    train <- make_image_list(train_data, cfg) |>
+      pool_images_and_labels(cfg)
+    
+  } else if (tolower(cfg$train_test$split_by) == "fraction") {
+    
+    image_list <- make_image_list(input_data, cfg)
+    
+    imgs <- seq(1, length(image_list)) # creates indices for all images to randomly sample for train/test sets
+    test_n <- round(length(imgs)*cfg$train_test$test_fraction)
+    
+    set.seed(seed=cfg$train_test$seed)
+    
+    TEST <- sample(imgs, test_n)
+    
+    TRAIN <- setdiff(imgs, TEST)
+    
+    train <- image_list[TRAIN]
+    test <- image_list[TEST]
+  } #else if (tolower(cfg$train_test$split_by) == "function") {
+    ## splitting by custom train/test splitting functions
+    #split_fun <- get(cfg$train_test$split_by)
+    #image_list <- split_fun(cfg, image_list)
   #}
   
-
+  processed <- list(train = train,
+                    test = test)
+  
+  # do we still want to keep balance validation set as an option
   #if (cfg$model$balance_val_set == TRUE) {
   #  train_val_split <- validation_splitter(image_list[TRAIN], cfg)
   #  
@@ -105,20 +92,8 @@ transform_data <- function(cfg,
   #  processed <- list(train = train,
   #                    val = val,
   #                    test = test)
-  #} else {
-  #  train <- pool_images_and_labels(image_list[TRAIN], 
-  #                                  cfg = cfg, 
-  #                                  downsample =cfg$model$downsample,
-  #                                  upsample = FALSE)
-  #  
-  #  test <- pool_images_and_labels(image_list[TEST], 
-  #                                 cfg = cfg,
-  #                                 upsample = FALSE)
-  #  
-  #  processed <- list(train = train,
-  #                    test = test)
-  #}
-
+  #} 
+  
   return(processed)
 }
 

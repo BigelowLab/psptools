@@ -21,6 +21,7 @@ two lists for forecast model input training and testing data. each list contains
 \item{image}
 \item{classifications}
 \item{toxicity}
+\item{species}
 \item{locations}
 \item{dates}
 \item{scaling_factors}
