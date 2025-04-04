@@ -1,4 +1,4 @@
-configuration: v0.3.1
+configuration: test_2024
 image_list:
   tox_levels:
   - 0.0
@@ -9,15 +9,15 @@ image_list:
   n_steps: 2.0
   minimum_gap: 4.0
   maximum_gap: 10.0
-  multisample_weeks: 'last'
+  multisample_weeks: last
   toxins:
-  - gtx4
   - gtx1
+  - gtx4
+  - gtx2
+  - gtx3
+  - dcgtx2
   - dcgtx3
   - gtx5
-  - dcgtx2
-  - gtx3
-  - gtx2
   - neo
   - dcstx
   - stx
@@ -40,16 +40,22 @@ model:
   loss_function: categorical_crossentropy
   model_metrics: categorical_accuracy
 train_test:
-  split_by: year
+  split_by: year_region_species
   train:
-  - '2014'
-  - '2015'
-  - '2016'
-  - '2017'
-  - '2018'
-  - '2019'
-  - '2020'
-  - '2021'
-  - '2022'
-  - '2023'
-  test: '2024'
+    species: mytilus
+    region: maine
+    year:
+    - '2014'
+    - '2015'
+    - '2016'
+    - '2017'
+    - '2018'
+    - '2019'
+    - '2020'
+    - '2021'
+    - '2022'
+    - '2023'
+  test:
+    species: mytilus
+    region: maine
+    year: '2024'
