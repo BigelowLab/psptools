@@ -20,12 +20,9 @@
 transform_data <- function(cfg, 
                            input_data, 
                            forecast_mode = FALSE) {
-  
-  # Log inputs to even distribution
-  # Handle multi-sampled weeks
   data <- input_data |> 
-    log_inputs(cfg) |>
-    find_multisample_weeks(mode = cfg$image_list$multisample_weeks)
+    log_inputs(cfg) |> # Log inputs to even distribution
+    find_multisample_weeks(mode = cfg$image_list$multisample_weeks) # Handle multi-sampled weeks
   
   if (forecast_mode == TRUE) {
     #call function to make new row after the newest measurement at each site, standard_gap days ahead, with NA values for variables and label
@@ -35,24 +32,24 @@ transform_data <- function(cfg,
   if (tolower(cfg$train_test$split_by) == "year_region_species") {
     is_cfg_valid(cfg)
     
-    test_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$test$year & 
-                                 .data$species %in% cfg$train_test$test$species &
-                                 .data$region %in% cfg$train_test$test$region)
+    test_data <- dplyr::filter(data, .data$year %in% cfg$train_test$test$year & 
+                                     .data$species %in% cfg$train_test$test$species &
+                                     .data$region %in% cfg$train_test$test$region)
     
     test <- make_image_list(test_data, cfg) |>
       pool_images_and_labels(cfg)
     
-    train_data <- dplyr::filter(input_data, .data$year %in% cfg$train_test$train$year & 
-                                  .data$species %in% cfg$train_test$train$species & 
-                                  .data$region %in% cfg$train_test$train$region &
-                                  !.data$id %in% test_data$id)
+    train_data <- dplyr::filter(data, .data$year %in% cfg$train_test$train$year & 
+                                      .data$species %in% cfg$train_test$train$species & 
+                                      .data$region %in% cfg$train_test$train$region &
+                                      !.data$id %in% test_data$id)
     
     train <- make_image_list(train_data, cfg) |>
       pool_images_and_labels(cfg)
     
   } else if (tolower(cfg$train_test$split_by) == "fraction") {
     
-    image_list <- make_image_list(input_data, cfg)
+    image_list <- make_image_list(data, cfg)
     
     imgs <- seq(1, length(image_list)) # creates indices for all images to randomly sample for train/test sets
     test_n <- round(length(imgs)*cfg$train_test$test_fraction)
@@ -66,7 +63,7 @@ transform_data <- function(cfg,
     train <- image_list[TRAIN]
     test <- image_list[TEST]
   } #else if (tolower(cfg$train_test$split_by) == "function") {
-    ## splitting by custom train/test splitting functions
+    # splitting by custom train/test splitting functions
     #split_fun <- get(cfg$train_test$split_by)
     #image_list <- split_fun(cfg, image_list)
   #}
