@@ -4,15 +4,15 @@
 \alias{make_image_list}
 \title{Takes raw input data, filters for image criteria and creates images with dimensions (n_steps + forecast steps) x length(toxins + environmentals)}
 \usage{
-make_image_list(raw_data, cfg)
+make_image_list(input_data, cfg)
 }
 \arguments{
-\item{raw_data}{database with toxin measurements with their date sampled, location, shellfish species and additional environmental data}
+\item{input_data}{tibble containing PSP measurements with their date sampled, location, shellfish species and additional covariates}
 
 \item{cfg}{psptools configuration}
 }
 \value{
-each list is an image along with its associated data (location_id, date, etc.)
+list of lists containing an image along with its associated data (location_id, date, etc.)
 \itemize{
 \item{status logical if the image passes the image gap criteria (gap >= minimum_gap & gap <= maximum_gap)}
 \item{year the year the image is from}

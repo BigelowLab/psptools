@@ -1,15 +1,8 @@
 #' Takes raw input data, filters for image criteria and creates images with dimensions (n_steps + forecast steps) x length(toxins + environmentals)
 #' 
-#' @param raw_data database with toxin measurements with their date sampled, location, shellfish species and additional environmental data
+#' @param input_data tibble containing PSP measurements with their date sampled, location, shellfish species and additional covariates
 #' @param cfg psptools configuration
-# @param tox_levels toxin level categories used for classifying total toxicity
-# @param forecast_steps the number of weeks ahead of the image the forecast is made for
-# @param n_steps the number of weeks of samples in an image
-# @param minimum_gap the smallest gap between samples allowed into an image
-# @param maximum_gap the largest gap between samples allowed into an image
-# @param toxins list of individual paralytic toxin names (12) for toxin columns
-# @param environmentals environmental variables
-#' @return each list is an image along with its associated data (location_id, date, etc.)
+#' @return list of lists containing an image along with its associated data (location_id, date, etc.)
 #' \itemize{
 #' \item{status logical if the image passes the image gap criteria (gap >= minimum_gap & gap <= maximum_gap)}
 #' \item{year the year the image is from}
@@ -22,19 +15,12 @@
 #' }
 #' 
 #' @export
-make_image_list <- function(raw_data, 
+make_image_list <- function(input_data, 
                             cfg) {
   
-  if (!"year" %in% colnames(raw_data)) {
-    raw_data <- dplyr::mutate(raw_data, year = format(date, "%Y"))
+  if (!"year" %in% colnames(input_data)) {
+    input_data <- dplyr::mutate(input_data, year = format(date, "%Y"))
   }
-  
-  normalized_data <- raw_data |> 
-    dplyr::arrange(.data$location_id, .data$date) |> # make sure rows are ordered by site, date
-    compute_gap() |> # gap should be updated anytime data enters this subroutine?
-    dplyr::mutate(classification = recode_classification(.data$total_toxicity, cfg$image_list$tox_levels), # update classification
-                  meets_gap = check_gap(.data$gap_days, cfg$image_list$minimum_gap, cfg$image_list$maximum_gap)) |> # check gap requirement
-    normalize_input(cfg$image_list$toxins, cfg$image_list$environmentals) 
   
   find_images <- function(tbl, key, forecast_steps, n_steps, minimum_gap, maximum_gap, toxins, environmentals) {
     
@@ -87,7 +73,7 @@ make_image_list <- function(raw_data,
     return(xx)
   }
   
-  image_list <- normalized_data |>
+  image_list <- input_data |>
     dplyr::group_by(.data$location_id, .data$year, .data$species) |>
     dplyr::group_map(find_images, cfg$image_list$forecast_steps, cfg$image_list$n_steps, cfg$image_list$minimum_gap, cfg$image_list$maximum_gap, cfg$image_list$toxins, cfg$image_list$environmentals, .keep=TRUE) |> 
     unlist(recursive = FALSE)

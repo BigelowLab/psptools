@@ -22,8 +22,13 @@ transform_data <- function(cfg,
                            forecast_mode = FALSE) {
   data <- input_data |> 
     log_inputs(cfg) |> # Log inputs to even distribution
-    find_multisample_weeks(mode = cfg$image_list$multisample_weeks) # Handle multi-sampled weeks
-  
+    find_multisample_weeks(mode = cfg$image_list$multisample_weeks) |> # Handle multi-sampled weeks 
+    normalize_input(cfg$image_list$toxins, cfg$image_list$environmentals) |> # normalize all of the input variables before splitting |> 
+    dplyr::arrange(.data$location_id, .data$date) |> # make sure rows are ordered by site, date
+    compute_gap() |> # gap should be updated anytime data enters this subroutine?
+    dplyr::mutate(classification = recode_classification(.data$total_toxicity, cfg$image_list$tox_levels), # update classification
+                  meets_gap = check_gap(.data$gap_days, cfg$image_list$minimum_gap, cfg$image_list$maximum_gap)) # check gap requirement
+    
   if (forecast_mode == TRUE) {
     #call function to make new row after the newest measurement at each site, standard_gap days ahead, with NA values for variables and label
     data <- forecast_dummy(data)
