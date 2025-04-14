@@ -62,6 +62,9 @@ make_image_list <- function(input_data,
       return(NULL) 
     }
     
+    tbl <- compute_gap(tbl) |>
+      dplyr::mutate(meets_gap = check_gap(.data$gap_days, minimum_gap, maximum_gap))
+    
     nbatches <- n_batches(nrow(tbl), (n_steps+forecast_steps))      # how many images can we make?
     batches <- compute_batches(nbatches, (n_steps+forecast_steps))  # define the indices of each image
     

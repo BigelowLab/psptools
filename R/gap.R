@@ -5,18 +5,7 @@
 #' 
 #' @export
 compute_gap <- function(x) {
-  
-  find_gap <- function(tbl, key) {
-    g <- tbl |>
-      dplyr::mutate(gap_days = c(0, ceiling(diff(date))))
-    return(g)
-  }
-  r <- x |> 
-    dplyr::arrange(.data$location_id, .data$date) |>
-    dplyr::group_by(.data$location_id, .data$year) |> 
-    dplyr::group_map(find_gap, .keep = TRUE) |>
-    dplyr::bind_rows()
-  
+  r <- dplyr::mutate(x, gap_days = c(0, ceiling(diff(date))))
   return(r)
 }
 
