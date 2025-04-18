@@ -71,6 +71,10 @@ pool_images_and_labels <- function(image_list_subset,
   species <- sapply(xx, function(x){x$species})
   attr(species, "names") <- NULL
   
+  if (!is.null(cfg$image_list$species)) {
+    image <- add_categorical_species(cfg, image, species)
+  }
+  
   r <- list(labels = labels, 
             image = image, 
             classifications = classifications,
@@ -91,4 +95,23 @@ pool_images_and_labels <- function(image_list_subset,
 replace_na <- function(x, missing_value = -1) {
   x[is.na(x)] <- missing_value
   return(x)
+}
+
+#' Adds categorical variables to each image
+#' @param cfg list defining psptools configuration
+#' @param image 2D array where each row is an image and the columns are toxins and environmentals from each week 
+#' @param species vector of species the length of `image`
+#' @return image with additional cols representing categorical species
+#' 
+add_categorical_species <- function(cfg, image, species) {
+  s <- unique(c(cfg$train_test$train$species, cfg$train_test$test$species))
+  lut <- seq(0,length(s)-1)
+  names(lut) <- s
+  
+  z <- sapply(species, function(x){return(lut[[x]])})
+  attr(z, "names") <- NULL
+  
+  species_cats <- keras::to_categorical(z, num_classes = length(s))
+  
+  new_image <- cbind(image, species_cats)
 }
