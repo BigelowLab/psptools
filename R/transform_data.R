@@ -27,10 +27,10 @@ transform_data <- function(cfg,
     dplyr::arrange(.data$location_id, .data$date) |> # make sure rows are ordered by site, date
     dplyr::mutate(classification = recode_classification(.data$total_toxicity, cfg$image_list$tox_levels)) # update classification
     
-  if (forecast_mode == TRUE) {
-    #call function to make new row after the newest measurement at each site, standard_gap days ahead, with NA values for variables and label
-    data <- forecast_dummy(data)
-  }
+  #if (forecast_mode == TRUE) {
+  #  #call function to make new row after the newest measurement at each site, standard_gap days ahead, with NA values for variables and label
+  #  data <- forecast_dummy(data)
+  #}
   
   if (tolower(cfg$train_test$split_by) == "year_region_species") {
     is_cfg_valid(cfg)
@@ -65,7 +65,27 @@ transform_data <- function(cfg,
     
     train <- image_list[TRAIN]
     test <- image_list[TEST]
-  } #else if (tolower(cfg$train_test$split_by) == "function") {
+    
+  } else if (tolower(cfg$train_test$split_by) == "forecast_mode") {
+    is_cfg_valid(cfg)
+    
+    test_data <- dplyr::filter(data, .data$year %in% cfg$train_test$test$year & 
+                                 .data$species %in% cfg$train_test$test$species &
+                                 .data$region %in% cfg$train_test$test$region) |>
+      forecast_dummy()
+    
+    test <- make_image_list(test_data, cfg) |>
+      pool_images_and_labels(cfg)
+    
+    train_data <- dplyr::filter(data, .data$year %in% cfg$train_test$train$year & 
+                                  .data$species %in% cfg$train_test$train$species & 
+                                  .data$region %in% cfg$train_test$train$region)
+    
+    train <- make_image_list(train_data, cfg) |>
+      pool_images_and_labels(cfg)
+  }
+  
+  #else if (tolower(cfg$train_test$split_by) == "function") {
     # splitting by custom train/test splitting functions
     #split_fun <- get(cfg$train_test$split_by)
     #image_list <- split_fun(cfg, image_list)

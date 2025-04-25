@@ -185,17 +185,20 @@ forecast_dummy <- function(data) {
     
     dummy_added <- tbl |> 
       dplyr::add_row(id = paste("FORECAST_WEEK", sep="_"),
-                     location_id = as.character(key),
+                     location_id = as.character(key$location_id),
+                     species = tbl$species[1],
                      date = forecast_date,
                      #year = format(Sys.Date(), format="%Y"),
                      year = format(max(tbl$date), format="%Y"),
-                     gap_days = 7)
+                     region = tbl$region[1],
+                     gap_days = 7,
+                     classification=0)
     
     return(dummy_added)
   }
   
   new_data <- data |> 
-    dplyr::group_by(.data$location_id) |> 
+    dplyr::group_by(.data$location_id, .data$species) |> 
     dplyr::group_map(add_dummy, .keep=TRUE) |> 
     dplyr::bind_rows()
   
