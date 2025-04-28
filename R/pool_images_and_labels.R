@@ -62,6 +62,9 @@ pool_images_and_labels <- function(image_list_subset,
   locations <- sapply(xx, function(x){return(x$location_id)})
   attr(locations, "names") <- NULL
   
+  location_id_int <- sapply(xx, function(x){return(x$location_id_int)})
+  attr(location_id_int, "names") <- NULL
+  
   dates <- sapply(xx, function(x){return(x$date)})
   attr(dates, "names") <- NULL
   
@@ -70,6 +73,9 @@ pool_images_and_labels <- function(image_list_subset,
   
   species <- sapply(xx, function(x){x$species})
   attr(species, "names") <- NULL
+  
+  species_id_int <- sapply(xx, function(x){x$species_id_int})
+  attr(species_id_int, "names") <- NULL
   
   if (!is.null(cfg$image_list$species)) {
     image <- add_categorical_species(cfg, image, species)
@@ -80,7 +86,9 @@ pool_images_and_labels <- function(image_list_subset,
             classifications = classifications,
             toxicity = toxicity,
             species = species,
+            species_id_int = species_id_int,
             locations = locations,
+            location_id_int = location_id_int,
             dates = dates,
             scaling_factors = scaling_factors)
   
