@@ -1,6 +1,5 @@
 # Script for preparing new configuration files
 
-library(yaml)
 
 # single year test example
 cfg <- list(
@@ -39,7 +38,7 @@ cfg <- list(
 
 # forecast mode example
 cfg <- list(
-  configuration="maine_forecast",
+  configuration="v0.4.0",
   image_list = list(tox_levels = c(0,10,30,80),
                     forecast_steps = 1,
                     n_steps = 2,
@@ -71,9 +70,11 @@ cfg <- list(
                                 year = c("2025")))
 )
 
+library(yaml)
+
 existing <- list.files("inst/configurations/")
 
-new_config_name <- "forecast.yaml"
+new_config_name <- "v0.4.0.yaml"
 
 if (!new_config_name %in% existing) {
   file_path <- file.path("inst/configurations/", new_config_name)

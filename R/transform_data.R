@@ -4,17 +4,7 @@
 #' @param cfg model configuration file
 #' @param input_data a tibble of input samples where each row is a sample and each column is a feature
 #' @param forecast_mode logical, if true, creates new dummy rows for each station to generate a forecast
-#' @returns two lists for forecast model input training and testing data. each list contains:
-#' \itemize{
-#' \item{labels}
-#' \item{image}
-#' \item{classifications}
-#' \item{toxicity}
-#' \item{species}
-#' \item{locations}
-#' \item{dates}
-#' \item{scaling_factors}
-#' }
+#' @returns two lists for transformed forecast model input training and testing data as `pool_images_and_labels()` output.
 #' 
 #' @export
 transform_data <- function(cfg, 

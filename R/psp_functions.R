@@ -186,13 +186,11 @@ forecast_dummy <- function(data) {
     dummy_added <- tbl |> 
       dplyr::add_row(id = paste("FORECAST_WEEK", sep="_"),
                      location_id = as.character(key$location_id),
-                     species = tbl$species[1],
                      date = forecast_date,
-                     #year = format(Sys.Date(), format="%Y"),
+                     species = tbl$species[1],
                      year = format(max(tbl$date), format="%Y"),
                      region = tbl$region[1],
-                     gap_days = 7,
-                     classification=0)
+                     gap_days = 7)
     
     return(dummy_added)
   }

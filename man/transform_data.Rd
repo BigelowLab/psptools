@@ -15,17 +15,7 @@ transform_data(cfg, input_data, forecast_mode = FALSE)
 \item{forecast_mode}{logical, if true, creates new dummy rows for each station to generate a forecast}
 }
 \value{
-two lists for forecast model input training and testing data. each list contains:
-\itemize{
-\item{labels}
-\item{image}
-\item{classifications}
-\item{toxicity}
-\item{species}
-\item{locations}
-\item{dates}
-\item{scaling_factors}
-}
+two lists for transformed forecast model input training and testing data as `pool_images_and_labels()` output.
 }
 \description{
 Takes raw data and transforms it to be ready for model input
