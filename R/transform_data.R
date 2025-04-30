@@ -64,7 +64,7 @@ transform_data <- function(cfg,
                                  .data$region %in% cfg$train_test$test$region) |>
       forecast_dummy()
     
-    test <- make_image_list(test_data, cfg) |>
+    test <- make_image_list(test_data, cfg, forecast_mode=TRUE) |>
       pool_images_and_labels(cfg)
     
     train_data <- dplyr::filter(data, .data$year %in% cfg$train_test$train$year & 

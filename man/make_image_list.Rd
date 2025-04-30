@@ -4,12 +4,14 @@
 \alias{make_image_list}
 \title{Takes raw input data, filters for image criteria and creates images with dimensions (n_steps + forecast steps) x length(toxins + environmentals)}
 \usage{
-make_image_list(input_data, cfg)
+make_image_list(input_data, cfg, forecast_mode = FALSE)
 }
 \arguments{
 \item{input_data}{tibble containing PSP measurements with their date sampled, location, shellfish species and additional covariates}
 
 \item{cfg}{psptools configuration}
+
+\item{forecast_mode}{logical, telling function if it is working on forecast images}
 }
 \value{
 list of lists containing an image along with its associated data (location_id, date, etc.)

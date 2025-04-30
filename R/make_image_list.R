@@ -2,6 +2,7 @@
 #' 
 #' @param input_data tibble containing PSP measurements with their date sampled, location, shellfish species and additional covariates
 #' @param cfg psptools configuration
+#' @param forecast_mode logical, telling function if it is working on forecast images
 #' @return list of lists containing an image along with its associated data (location_id, date, etc.)
 #' \itemize{
 #' \item{status logical if the image passes the image gap criteria (gap >= minimum_gap & gap <= maximum_gap)}
@@ -16,7 +17,8 @@
 #' 
 #' @export
 make_image_list <- function(input_data, 
-                            cfg) {
+                            cfg,
+                            forecast_mode=FALSE) {
   
   if (!"year" %in% colnames(input_data)) {
     input_data <- dplyr::mutate(input_data, year = format(date, "%Y"))
@@ -80,6 +82,14 @@ make_image_list <- function(input_data,
     dplyr::group_by(.data$location_id, .data$year, .data$species) |>
     dplyr::group_map(find_images, cfg$image_list$forecast_steps, cfg$image_list$n_steps, cfg$image_list$minimum_gap, cfg$image_list$maximum_gap, cfg$image_list$toxins, cfg$image_list$environmentals, .keep=TRUE) |> 
     unlist(recursive = FALSE)
+  
+  if(forecast_mode) {
+    years <- sapply(image_list, function(x) {return(x$year)})
+    image_list <- split(image_list, years)
+    
+    image_list <- image_list["FORECAST_IMAGE"] |>
+      unlist(recursive=FALSE)
+  }
   
   return(image_list)
 }
