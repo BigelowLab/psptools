@@ -9,26 +9,11 @@
 make_forecast_list <- function(cfg, 
                                model, 
                                forecast_mode=FALSE) {
-  
-  #stations <- read_psp_stations()
-  
-  #name_lut <- stations$name
-  #names(name_lut) <- stations$location_id
-  
-  #lat_lut <- stations$lat
-  #names(lat_lut) <- stations$location_id
-  
-  #lon_lut <- stations$lon
-  #names(lon_lut) <- stations$location_id
-  
 
   if (forecast_mode == TRUE) {
     forecast_list <- dplyr::tibble(version = cfg$configuration,
                                    location = model$locations,
                                    date = as.Date(as.numeric(model$dates), origin = as.Date("1970-01-01")),
-                                   #name = name_lut[.data$location],
-                                   #lat = lat_lut[.data$location],
-                                   #lon = lon_lut[.data$location],
                                    class_bins = "0,10,30,80",
                                    forecast_start_date = as.Date(as.numeric(model$dates), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7-3,
                                    forecast_end_date = as.Date(as.numeric(model$dates), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7+3)
@@ -37,16 +22,13 @@ make_forecast_list <- function(cfg,
     forecast_list <- dplyr::tibble(version = cfg$configuration,
                                    location = model$locations,
                                    date = as.Date(as.numeric(model$dates), origin = as.Date("1970-01-01")),
-                                   #name = name_lut[.data$location],
-                                   #lat = lat_lut[.data$location],
-                                   #lon = lon_lut[.data$location],
+                                   species = model$species,
                                    class_bins = "0,10,30,80",
                                    forecast_start_date = as.Date(as.numeric(model$dates), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7-3,
                                    forecast_end_date = as.Date(as.numeric(model$dates), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7+3,
                                    actual_class = model$test_classifications,
                                    actual_toxicity = model$test_toxicity)
   }
-  
   
   if (length(cfg$image_list$tox_levels) == 2) {
     forecast_list <- forecast_list

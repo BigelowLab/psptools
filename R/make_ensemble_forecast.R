@@ -23,7 +23,7 @@ make_ensemble_forecast <- function(cfg, predictions) {
   }
   
   ensemble_forecast <- predictions |> 
-    dplyr::group_by(.data$location, .data$date) |> 
+    dplyr::group_by(.data$location, .data$date, .data$species) |> 
     dplyr::group_map(site_forecast, .keep=TRUE) |> 
     dplyr::bind_rows() |> 
     dplyr::arrange(.data$date, .data$location)

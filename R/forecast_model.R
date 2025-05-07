@@ -83,6 +83,7 @@ forecast_model <- function(cfg, model_input, forecast_mode=FALSE) {
                      year = cfg$train_test$test,
                      dates = model_input$test$dates,
                      locations = model_input$test$locations,
+                     species = model_input$test$species,
                      test_classifications = model_input$test$classifications,
                      test_toxicity = model_input$test$toxicity,
                      predicted_probs = predicted_probs)
@@ -90,9 +91,6 @@ forecast_model <- function(cfg, model_input, forecast_mode=FALSE) {
     model_output <- list(forecast = forecast, 
                          model = model, 
                          history = history)
-    
   }
-  
   return(model_output)
-  
 }
