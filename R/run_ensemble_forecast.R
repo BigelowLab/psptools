@@ -30,6 +30,7 @@ run_ensemble_forecast <- function(cfg,
                         name = character(),
                         lat = numeric(),
                         lon = numeric(),
+                        species = character(),
                         class_bins = character(),
                         forecast_start_date = Sys.Date(),
                         forecast_end_date = Sys.Date(),
@@ -44,29 +45,34 @@ run_ensemble_forecast <- function(cfg,
       dplyr::bind_rows(runs)
   }
   
-  site_forecast <- function(tbl, key) {
-    forecast_list <- dplyr::tibble(version = cfg$configuration,
-                                   ensemble_n = n,
-                                   location = tbl$location[1],
-                                   date = tbl$date[1],
-                                   class_bins = "0,10,30,80",
-                                   forecast_start_date = as.Date(as.numeric(date), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7-3,
-                                   forecast_end_date = as.Date(as.numeric(date), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7+3,
-                                   p_0 = round(mean(tbl$prob_0)),
-                                   p_1 = round(mean(tbl$prob_1)),
-                                   p_2 = round(mean(tbl$prob_2)),
-                                   p_3 = round(mean(tbl$prob_3)),
-                                   p3_sd = sd(tbl$prob_3),
-                                   p_3_min = min(tbl$prob_3),
-                                   p_3_max = max(tbl$prob_3)) |> 
-      dplyr::mutate(predicted_class = which.max(c(.data$p_0, .data$p_1, .data$p_2, .data$p_3)) - 1)
-  }
+  #site_forecast <- function(tbl, key) {
+  #  forecast_list <- dplyr::tibble(version = cfg$configuration,
+  #                                 ensemble_n = n,
+  #                                 location = tbl$location[1],
+  #                                 date = tbl$date[1],
+  #                                 class_bins = "0,10,30,80",
+  #                                 forecast_start_date = as.Date(as.numeric(date), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7-3,
+  #                                 forecast_end_date = as.Date(as.numeric(date), origin = as.Date("1970-01-01")) + cfg$image_list$forecast_steps*7+3,
+  #                                 p_0 = round(mean(tbl$prob_0)),
+  #                                 p_1 = round(mean(tbl$prob_1)),
+  #                                 p_2 = round(mean(tbl$prob_2)),
+  #                                 p_3 = round(mean(tbl$prob_3)),
+  #                                 p3_sd = sd(tbl$prob_3),
+  #                                 p_3_min = min(tbl$prob_3),
+  #                                 p_3_max = max(tbl$prob_3)) |> 
+  #    dplyr::mutate(predicted_class = which.max(c(.data$p_0, .data$p_1, .data$p_2, .data$p_3)) - 1)
+  #}
+  #
+  #ensemble_forecast <- runs |> 
+  #  dplyr::group_by(.data$location, .data$date) |> 
+  #  dplyr::group_map(site_forecast, .keep=TRUE) |> 
+  #  dplyr::bind_rows() |>
+  #  dplyr::mutate(f_id = paste(.data$location, .data$date, sep="_"))
   
-  ensemble_forecast <- runs |> 
-    dplyr::group_by(.data$location, .data$date) |> 
-    dplyr::group_map(site_forecast, .keep=TRUE) |> 
-    dplyr::bind_rows() |>
-    dplyr::mutate(f_id = paste(.data$location, .data$date, sep="_"))
+  ensemble_forecast <- make_ensemble_forecast(cfg, runs, forecast_mode = TRUE) |>
+    dplyr::mutate(version = cfg$configuration,
+                  ensemble_n = n,
+                  .before="location")
   
   runs <- runs |>
     dplyr::mutate(f_id = paste(.data$location, .data$date, sep="_"))

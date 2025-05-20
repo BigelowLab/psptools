@@ -40,7 +40,7 @@ run_ensemble_test <- function(cfg,
     ggplot2::geom_point(ggplot2::aes(alpha = 0.4)) +
     ggplot2::ggtitle("Probability of Class 3 vs Actual Class - All Predictions (n runs)")
   
-  ensemble_forecast <- make_ensemble_forecast(cfg, all_predictions)
+  ensemble_forecast <- make_ensemble_forecast(cfg, all_predictions, forecast_mode = FALSE)
   
   ensemble_predictions <- ensemble_forecast$predictions |> 
     dplyr::arrange(dplyr::desc(.data$p3_variance)) |> 
@@ -67,10 +67,12 @@ run_ensemble_test <- function(cfg,
     readr::write_csv(ensemble_forecast$metrics, "ensemble_test_results.csv.gz", append=TRUE)
   }
   
+  ensemble_metrics <- forecast_metrics(ensemble_forecast)
+  
   z <- list(all_predictions = all_predictions,
             ensemble_predictions = ensemble_predictions,
             run_metrics = run_metrics,
-            ensemble_metrics = ensemble_forecast$metrics,
+            ensemble_metrics = ensemble_metrics,
             p3_v_tox = p3_v_tox,
             p3_v_class = p3_v_class,
             p3_v_tox_ens = p3_v_tox_ens,

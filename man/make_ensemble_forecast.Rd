@@ -2,18 +2,20 @@
 % Please edit documentation in R/make_ensemble_forecast.R
 \name{make_ensemble_forecast}
 \alias{make_ensemble_forecast}
-\title{Transforms predictions from ensemble model test runs and combines them into an ensemble forecast with metrics}
+\title{Transforms predictions multiple model runs and combines them into an ensemble forecast}
 \usage{
-make_ensemble_forecast(cfg, predictions)
+make_ensemble_forecast(cfg, predictions, forecast_mode)
 }
 \arguments{
 \item{cfg}{a configuration list}
 
 \item{predictions}{a table of predictions where each site-date has multiple entries}
+
+\item{forecast_mode}{logical if running an ensemble of real-time predictions or testing a hindcast}
 }
 \value{
 a list containing a table of predictions where each site-date has one prediction and metrics
 }
 \description{
-Transforms predictions from ensemble model test runs and combines them into an ensemble forecast with metrics
+Transforms predictions multiple model runs and combines them into an ensemble forecast
 }

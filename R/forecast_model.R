@@ -66,6 +66,7 @@ forecast_model <- function(cfg, model_input, forecast_mode=FALSE) {
     forecast <- list(year = cfg$train_test$test,
                      dates = model_input$test$dates,
                      locations = model_input$test$locations,
+                     species = model_input$test$species,
                      predicted_probs = predicted_probs)
     
     model_output <- list(forecast = forecast, 
