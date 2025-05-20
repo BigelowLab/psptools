@@ -2,9 +2,16 @@
 % Please edit documentation in R/run_ensemble_forecast.R
 \name{run_ensemble_forecast}
 \alias{run_ensemble_forecast}
-\title{Run the forecast model n times and generate an ensemble forecast}
+\title{Run the forecast model n times and generate a real-time ensemble forecast}
 \usage{
-run_ensemble_forecast(cfg, input_data, n = 10, f_mode = TRUE, past_predictions)
+run_ensemble_forecast(
+  cfg,
+  input_data,
+  n = 10,
+  model_mode = c("train", "load")[1],
+  model_dir = NULL,
+  past_predictions
+)
 }
 \arguments{
 \item{cfg}{name of configuration file for model parameters}
@@ -13,7 +20,9 @@ run_ensemble_forecast(cfg, input_data, n = 10, f_mode = TRUE, past_predictions)
 
 \item{n}{the number of times to run the ensemble}
 
-\item{f_mode}{logical whether to call functions in forecast mode}
+\item{model_mode}{character setting whether to train new models or load pre-trained ones}
+
+\item{model_dir}{character path to directory containing pre-trained models}
 
 \item{past_predictions}{tibble of predictions that have already been made this season}
 }
@@ -21,5 +30,5 @@ run_ensemble_forecast(cfg, input_data, n = 10, f_mode = TRUE, past_predictions)
 a list containing an ensemble forecast and the predictions from each of the ensemble members
 }
 \description{
-Run the forecast model n times and generate an ensemble forecast
+Run the forecast model n times and generate a real-time ensemble forecast
 }

@@ -19,7 +19,7 @@ run_ensemble_test <- function(cfg,
   
   for (i in 1:n_runs) {
     
-    test <- run_model(cfg, model_input)
+    test <- train_and_predict(cfg, model_input, forecast_mode=FALSE)
     
     run_metrics <- run_metrics |> 
       dplyr::bind_rows(test$metrics)
