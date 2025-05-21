@@ -21,9 +21,6 @@ run_ensemble_forecast <- function(cfg,
   runs <- dplyr::tibble(version = character(),
                         location = character(),
                         date = Sys.Date(),
-                        name = character(),
-                        lat = numeric(),
-                        lon = numeric(),
                         species = character(),
                         class_bins = character(),
                         forecast_start_date = Sys.Date(),
@@ -53,7 +50,7 @@ run_ensemble_forecast <- function(cfg,
                   .before="location")
   
   runs <- runs |>
-    dplyr::mutate(f_id = paste(.data$location, .data$date, sep="_"))
+    dplyr::mutate(f_id = paste(.data$location, .data$date, .data$species, sep="_"))
   
   if (!is.null(past_predictions)) {
     ensemble_forecast <- dplyr::filter(ensemble_forecast, format(date, format = "%Y") == format(Sys.Date(), format = "%Y") & !.data$f_id %in% past_predictions$f_id)
