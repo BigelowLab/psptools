@@ -28,8 +28,7 @@ run_ensemble_test <- function(cfg,
       dplyr::bind_rows(test$predictions)
   }
   
-  run_metrics <- run_metrics |> 
-    dplyr::arrange(dplyr::desc(.data$tp))
+  run_metrics <- dplyr::arrange(run_metrics, dplyr::desc(.data$tp))
   
   p3_v_tox <- ggplot2::ggplot(data=all_predictions, ggplot2::aes(x = .data$prob_3, y = .data$actual_toxicity)) +
     ggplot2::geom_point(ggplot2::aes(alpha = 0.4)) +
@@ -42,13 +41,12 @@ run_ensemble_test <- function(cfg,
   
   ensemble_forecast <- make_ensemble_forecast(cfg, all_predictions, forecast_mode = FALSE)
   
-  ensemble_predictions <- ensemble_forecast$predictions |> 
-    dplyr::arrange(dplyr::desc(.data$p3_variance)) |> 
+  ensemble_predictions <- dplyr::arrange(ensemble_forecast, dplyr::desc(.data$p3_sd)) |> 
     dplyr::mutate(p_diff = .data$predicted_class - .data$actual_class)
   
-  confusion_matrix <- make_confusion_matrix(cfg, ensemble_forecast$predictions)
+  confusion_matrix <- make_confusion_matrix(cfg, ensemble_forecast)
   
-  p3_v_tox_ens <- ggplot2::ggplot(data=ensemble_forecast$predictions, ggplot2::aes(x = .data$p_3, y = .data$actual_toxicity)) +
+  p3_v_tox_ens <- ggplot2::ggplot(data=ensemble_forecast, ggplot2::aes(x = .data$p_3, y = .data$actual_toxicity)) +
     ggplot2::geom_point(alpha = 0.4) +
     ggplot2::geom_hline(yintercept = 80, linetype="dashed") +
     ggplot2::ggtitle("Probability of Class 3 vs Actual Toxicity - Ensemble Predictions") +
@@ -56,7 +54,7 @@ run_ensemble_test <- function(cfg,
                   y = "Measured PSP toxicity")
   
   
-  p3_v_class_ens <- ggplot2::ggplot(data=ensemble_forecast$predictions, ggplot2::aes(x = .data$p_3, y = .data$actual_class)) +
+  p3_v_class_ens <- ggplot2::ggplot(data=ensemble_forecast, ggplot2::aes(x = .data$p_3, y = .data$actual_class)) +
     ggplot2::geom_hline(yintercept = 80, linetype="dashed") +
     ggplot2::ggtitle("Probability of Class 3 vs Actual Class - Ensemble Predictions") +
     ggplot2::labs(x = "Probability of closure-level toxicity",
