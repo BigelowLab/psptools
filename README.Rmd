@@ -3,9 +3,9 @@ title: "psptools"
 output: github_document
 ---
 
-Tools for making shellfish toxicity forecasts using past toxicity measurements and associated environmental observation data
+Open-source R package developed for making shellfish toxicity forecasts using regulatory monitoring data
 
-# Requirements
+# Setup
 
 ### [Tensorflow](https://tensorflow.rstudio.com/) and [Keras](https://tensorflow.rstudio.com/guides/keras/basics)
 
@@ -22,7 +22,111 @@ library(keras)
 install_keras(envname = "r-reticulate")
 ```
 
-### Packages from CRAN
+### Package Installation
+
+```
+remotes::install_github("BigelowLab/psptools")
+```
+
+# Usage
+
+Here we provide a brief demonstration of going from raw input data to a forecast of shellfish toxicity measurements. For full documentation of each step, please refer to [psptools-guide](https://bigelowlab.github.io/psptools-guide/).
+
+### Input data
+
+Prepare your input data for transforming into model input. The input table must have the columns: 
+
+ + The date and year each toxicity measurement was taken (`date` + `year`)
+ 
+ + A unique location identifier where the sample was taken (`location_id`)
+ 
+ + The total measured toxicity which will be used to predict (`total_toxicity`)
+ 
+ + The species (or genus) of shellfish measured (`species`)
+ 
+ + The region the sample is from, although the region may be the same for both train and test sets (`region`)
+ 
+ + Individual columns used for model input ie 12 congeners (`gtx4`, `gtx1`, etc...)
+
+```{r echo=FALSE, message=FALSE}
+library(psptools)
+library(pspdata)
+library(dplyr)
+```
+
+```{r}
+input_data <- read_psp_data(model_ready = TRUE)
+
+glimpse(input_data)
+```
+
+
+### Model Configuration Testing
+
+```{r}
+cfg <- list(
+  configuration="irish_2week",
+  image_list = list(tox_levels = c(0,10,30,80),
+                    forecast_steps = 1,
+                    n_steps = 2,
+                    minimum_gap = 4,
+                    maximum_gap = 10,
+                    multisample_weeks = "last",
+                    toxins = c("gtx1", "gtx4", "gtx2", "gtx3", "dcgtx2", "dcgtx3", "gtx5", "neo", "dcstx", "stx", "c1", "c2")),
+  model = list(balance_val_set=FALSE,
+               downsample=FALSE,
+               use_class_weights=FALSE,
+               dropout1 = 0.3,
+               dropout2 = 0.3,
+               batch_size = 32, 
+               units1 = 32, 
+               units2 = 32, 
+               epochs = 64, 
+               validation_split = 0.2,
+               shuffle = TRUE,
+               num_classes = 4,
+               optimizer="adam",
+               loss_function="categorical_crossentropy",
+               model_metrics=c("categorical_accuracy")),
+  train_test = list(split_by = "year_region_species",
+                    train = list(species = "mytilus",
+                                 region = "maine",
+                                 year=c("2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")), 
+                    test = list(species = "mytilus",
+                                region = "maine",
+                                year = c("2024")))
+)
+```
+
+Use `run_ensemble_test()` to test the performance of a model configuration
+
+```{r include=FALSE}
+test <- run_ensemble_test(cfg, 
+                          input_data, 
+                          n_runs = 5)
+```
+
+The output includes the metrics of predictions from an ensemble of `n_runs`,
+
+```{r}
+test$ensemble_metrics
+```
+
+and an ensemble confusion matrix
+
+```{r}
+test$ensemble_cm
+```
+
+### Forecasting
+
+To make real-time predictions, assign `split_by = "forecast_mode"` in the configuration object, then run:
+
+```
+forecast <- run_ensemble_forecast(cfg, input_data, ...)
+```
+
+# Requirements from CRAN
 
   + [rlang](https://CRAN.R-project.org/package=rlang)
 
@@ -39,88 +143,3 @@ install_keras(envname = "r-reticulate")
   + [stats](https://CRAN.R-project.org/package=stats)
   
   + [readr](https://CRAN.R-project.org/package=readr)
-
-### Installation
-
-```
-remotes::install_github("BigelowLab/psptools")
-```
-
-# Usage
-
-Here we provide a brief demonstration of going from raw input data to a forecast of shellfish toxicity measurements. For full documentation of each step, please refer to [psptools-guide](https://bigelowlab.github.io/psptools-guide/).
-
-### Input data
-
-Prepare your input data for transforming into model input. The input table must have the columns: 
-
- + The date each toxicity measurement was taken (date)
- 
- + A unique location identifier where the sample was taken (location_id)
- 
- + The total measured toxicity which will be used to predict (total_toxicity)
- 
- + Individual columns used for model input (12 congners - gtx4, gtx1, etc...)
-
-
-
-```{r}
-library(pspdata)
-
-input_data <- read_psp_data(model_ready=TRUE)
-
-input_data
-```
-
-### Configuration
-
-Read in a configuration that defines the input data shape, model architecture and details of the test. In this example, we'll run a test using samples made up of 2 measurements that are between 4-10 days apart to predict one measurement ahead. Total toxicity will be binned into four classes using the breaks 10, 30 and 80 (psp units), and twelve saxitoxin congeners will be used from each measurement. The model will train on data from 2014-2023 and test on 2024. 
-
-```{r}
-library(psptools)
-
-cfg <- read_config(filename="test_2024.yaml")
-
-cfg
-```
-
-### Model input
-
-Go from raw input data to seperate traning and testing sets containing samples made up of consecutive toxicity measurements and their resulting toxicity n steps ahead
-
-```{r}
-model_input <- transform_data(cfg, input_data, forecast_mode=FALSE)
-
-str(model_input)
-```
-
-### Model training and prediction
-
-```{r results='hide'}
-model <- forecast_model(cfg, model_input, forecast_mode=FALSE)
-```
-
-### Make a forecast list
-
-Combine all of the predictions the model made into a table with their metadata
-
-```{r}
-forecast_list <- make_forecast_list(cfg, model$forecast, forecast_mode = FALSE)
-  
-forecast_list
-```
-
-### Model skill
-
-```{r}
-metrics = forecast_metrics(forecast_list)
-
-metrics
-```
-
-A confusion matrix can help to visualize multiclass acurracy
-
-```{r}
-make_confusion_matrix(cfg, forecast_list)
-```
-

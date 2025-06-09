@@ -1,10 +1,10 @@
 psptools
 ================
 
-Tools for making shellfish toxicity forecasts using past toxicity
-measurements and associated environmental observation data
+Open-source R package developed for making shellfish toxicity forecasts
+using regulatory monitoring data
 
-# Requirements
+# Setup
 
 ### [Tensorflow](https://tensorflow.rstudio.com/) and [Keras](https://tensorflow.rstudio.com/guides/keras/basics)
 
@@ -21,7 +21,137 @@ running the psptools software:
     library(keras)
     install_keras(envname = "r-reticulate")
 
-### Packages from CRAN
+### Package Installation
+
+    remotes::install_github("BigelowLab/psptools")
+
+# Usage
+
+Here we provide a brief demonstration of going from raw input data to a
+forecast of shellfish toxicity measurements. For full documentation of
+each step, please refer to
+[psptools-guide](https://bigelowlab.github.io/psptools-guide/).
+
+### Input data
+
+Prepare your input data for transforming into model input. The input
+table must have the columns:
+
+- The date and year each toxicity measurement was taken (`date` +
+  `year`)
+
+- A unique location identifier where the sample was taken
+  (`location_id`)
+
+- The total measured toxicity which will be used to predict
+  (`total_toxicity`)
+
+- The species (or genus) of shellfish measured (`species`)
+
+- The region the sample is from, although the region may be the same for
+  both train and test sets (`region`)
+
+- Individual columns used for model input ie 12 congeners (`gtx4`,
+  `gtx1`, etc…)
+
+``` r
+input_data <- read_psp_data(model_ready = TRUE)
+
+glimpse(input_data)
+```
+
+    ## Rows: 15,200
+    ## Columns: 20
+    ## $ id             <chr> "12091_2019-07-10_arctica", "12092_2019-07-10_arctica",…
+    ## $ location_id    <chr> "12091", "12092", "12125", "ACINC", "ACINC", "ACInc", "…
+    ## $ species        <chr> "arctica", "arctica", "arctica", "arctica", "arctica", …
+    ## $ total_toxicity <dbl> 31.4491000, 44.8684900, 70.3315700, 0.3268534, 5.949918…
+    ## $ gtx4           <dbl> 0.000000, 8.088602, 17.028635, 0.000000, 0.000000, 0.00…
+    ## $ gtx1           <dbl> 4.831219, 6.642926, 12.681950, 0.000000, 0.000000, 0.00…
+    ## $ dcgtx3         <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+    ## $ gtx5           <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+    ## $ dcgtx2         <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+    ## $ gtx3           <dbl> 18.3904384, 22.9927635, 28.5759119, 0.3268534, 4.390941…
+    ## $ gtx2           <dbl> 4.982137, 7.144196, 8.679571, 0.000000, 0.000000, 0.000…
+    ## $ neo            <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+    ## $ dcstx          <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+    ## $ stx            <dbl> 3.245307, 0.000000, 3.365504, 0.000000, 0.000000, 0.000…
+    ## $ c1             <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+    ## $ c2             <dbl> 0.000000, 0.000000, 0.000000, 0.000000, 1.558977, 0.000…
+    ## $ date           <date> 2019-07-10, 2019-07-10, 2019-07-10, 2018-04-27, 2019-0…
+    ## $ year           <chr> "2019", "2019", "2019", "2018", "2019", "2019", "2019",…
+    ## $ region         <chr> "maine", "maine", "maine", "maine", "maine", "maine", "…
+    ## $ gap_days       <dbl> 0, 0, 0, 0, 0, 0, 2, 62, 0, 0, 14, 18, 0, 0, 11, 15, 17…
+
+### Model Configuration Testing
+
+``` r
+cfg <- list(
+  configuration="irish_2week",
+  image_list = list(tox_levels = c(0,10,30,80),
+                    forecast_steps = 1,
+                    n_steps = 2,
+                    minimum_gap = 4,
+                    maximum_gap = 10,
+                    multisample_weeks = "last",
+                    toxins = c("gtx1", "gtx4", "gtx2", "gtx3", "dcgtx2", "dcgtx3", "gtx5", "neo", "dcstx", "stx", "c1", "c2")),
+  model = list(balance_val_set=FALSE,
+               downsample=FALSE,
+               use_class_weights=FALSE,
+               dropout1 = 0.3,
+               dropout2 = 0.3,
+               batch_size = 32, 
+               units1 = 32, 
+               units2 = 32, 
+               epochs = 64, 
+               validation_split = 0.2,
+               shuffle = TRUE,
+               num_classes = 4,
+               optimizer="adam",
+               loss_function="categorical_crossentropy",
+               model_metrics=c("categorical_accuracy")),
+  train_test = list(split_by = "year_region_species",
+                    train = list(species = "mytilus",
+                                 region = "maine",
+                                 year=c("2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")), 
+                    test = list(species = "mytilus",
+                                region = "maine",
+                                year = c("2024")))
+)
+```
+
+Use `run_ensemble_test()` to test the performance of a model
+configuration
+
+The output includes the metrics of predictions from an ensemble of
+`n_runs`,
+
+``` r
+test$ensemble_metrics
+```
+
+    ## # A tibble: 1 × 10
+    ##      tp    fp    tn    fn accuracy cl_accuracy   f_1 precision sensitivity
+    ##   <int> <int> <int> <int>    <dbl>       <dbl> <dbl>     <dbl>       <dbl>
+    ## 1     5     8   425     4    0.717       0.973 0.455     0.385       0.556
+    ## # ℹ 1 more variable: specificity <dbl>
+
+and an ensemble confusion matrix
+
+``` r
+test$ensemble_cm
+```
+
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+
+### Forecasting
+
+To make real-time predictions, assign `split_by = "forecast_mode"` in
+the configuration object, then run:
+
+    forecast <- run_ensemble_forecast(cfg, input_data, ...)
+
+# Requirements from CRAN
 
 - [rlang](https://CRAN.R-project.org/package=rlang)
 
@@ -38,252 +168,3 @@ running the psptools software:
 - [stats](https://CRAN.R-project.org/package=stats)
 
 - [readr](https://CRAN.R-project.org/package=readr)
-
-### Installation
-
-    remotes::install_github("BigelowLab/psptools")
-
-# Usage
-
-Here we provide a brief demonstration of going from raw input data to a
-forecast of shellfish toxicity measurements. For full documentation of
-each step, please refer to
-[psptools-guide](https://bigelowlab.github.io/psptools-guide/).
-
-### Input data
-
-Prepare your input data for transforming into model input. The input
-table must have the columns:
-
-- The date each toxicity measurement was taken (date)
-
-- A unique location identifier where the sample was taken (location_id)
-
-- The total measured toxicity which will be used to predict
-  (total_toxicity)
-
-- Individual columns used for model input (12 congners - gtx4, gtx1,
-  etc…)
-
-``` r
-library(pspdata)
-
-input_data <- read_psp_data(model_ready=TRUE)
-
-input_data
-```
-
-    ## # A tibble: 11,668 × 19
-    ##    id    location_id total_toxicity  gtx4  gtx1 dcgtx3  gtx5 dcgtx2   gtx3  gtx2
-    ##    <chr> <chr>                <dbl> <dbl> <dbl>  <dbl> <dbl>  <dbl>  <dbl> <dbl>
-    ##  1 DMC_… DMC                138.     18.7  37.8      0     0      0 24.6    20.6
-    ##  2 Isle… Isleboro             0       0     0        0     0      0  0       0  
-    ##  3 MIDG… MIDGIx              15.0     0     0        0     0      0  8.53    0  
-    ##  4 PE3M… PE3M                 0       0     0        0     0      0  0       0  
-    ##  5 PEN … PEN BB               0       0     0        0     0      0  0       0  
-    ##  6 PEN … PEN FIX              0       0     0        0     0      0  0       0  
-    ##  7 PENB… PENBB                0.388   0     0        0     0      0  0.388   0  
-    ##  8 PENB… PENBB                0       0     0        0     0      0  0       0  
-    ##  9 PENF… PENFIX               0.646   0     0        0     0      0  0.646   0  
-    ## 10 PENF… PENFIX               0.184   0     0        0     0      0  0.184   0  
-    ## # ℹ 11,658 more rows
-    ## # ℹ 9 more variables: neo <dbl>, dcstx <dbl>, stx <dbl>, c1 <dbl>, c2 <dbl>,
-    ## #   date <date>, classification <dbl>, year <chr>, gap_days <dbl>
-
-### Configuration
-
-Read in a configuration that defines the input data shape, model
-architecture and details of the test. In this example, we’ll run a test
-using samples made up of 2 measurements that are between 4-10 days apart
-to predict one measurement ahead. Total toxicity will be binned into
-four classes using the breaks 10, 30 and 80 (psp units), and twelve
-saxitoxin congeners will be used from each measurement. The model will
-train on data from 2014-2023 and test on 2024.
-
-``` r
-library(psptools)
-```
-
-    ## 
-    ## Attaching package: 'psptools'
-
-    ## The following object is masked from 'package:pspdata':
-    ## 
-    ##     compute_gap
-
-``` r
-cfg <- read_config(filename="test_2024.yaml")
-
-cfg
-```
-
-    ## $configuration
-    ## [1] "v0.3.1"
-    ## 
-    ## $image_list
-    ## $image_list$tox_levels
-    ## [1]  0 10 30 80
-    ## 
-    ## $image_list$forecast_steps
-    ## [1] 1
-    ## 
-    ## $image_list$n_steps
-    ## [1] 2
-    ## 
-    ## $image_list$minimum_gap
-    ## [1] 4
-    ## 
-    ## $image_list$maximum_gap
-    ## [1] 10
-    ## 
-    ## $image_list$multisample_weeks
-    ## [1] "last"
-    ## 
-    ## $image_list$toxins
-    ##  [1] "gtx4"   "gtx1"   "dcgtx3" "gtx5"   "dcgtx2" "gtx3"   "gtx2"   "neo"   
-    ##  [9] "dcstx"  "stx"    "c1"     "c2"    
-    ## 
-    ## 
-    ## $model
-    ## $model$balance_val_set
-    ## [1] FALSE
-    ## 
-    ## $model$downsample
-    ## [1] FALSE
-    ## 
-    ## $model$use_class_weights
-    ## [1] FALSE
-    ## 
-    ## $model$dropout1
-    ## [1] 0.3
-    ## 
-    ## $model$dropout2
-    ## [1] 0.3
-    ## 
-    ## $model$batch_size
-    ## [1] 32
-    ## 
-    ## $model$units1
-    ## [1] 32
-    ## 
-    ## $model$units2
-    ## [1] 32
-    ## 
-    ## $model$epochs
-    ## [1] 128
-    ## 
-    ## $model$validation_split
-    ## [1] 0.2
-    ## 
-    ## $model$shuffle
-    ## [1] TRUE
-    ## 
-    ## $model$num_classes
-    ## [1] 4
-    ## 
-    ## $model$optimizer
-    ## [1] "adam"
-    ## 
-    ## $model$loss_function
-    ## [1] "categorical_crossentropy"
-    ## 
-    ## $model$model_metrics
-    ## [1] "categorical_accuracy"
-    ## 
-    ## 
-    ## $train_test
-    ## $train_test$split_by
-    ## [1] "year"
-    ## 
-    ## $train_test$train
-    ##  [1] "2014" "2015" "2016" "2017" "2018" "2019" "2020" "2021" "2022" "2023"
-    ## 
-    ## $train_test$test
-    ## [1] "2024"
-
-### Model input
-
-Go from raw input data to seperate traning and testing sets containing
-samples made up of consecutive toxicity measurements and their resulting
-toxicity n steps ahead
-
-``` r
-model_input <- transform_data(cfg, input_data, forecast_mode=FALSE)
-
-str(model_input)
-```
-
-    ## List of 2
-    ##  $ train:List of 7
-    ##   ..$ labels         : num [1:7421, 1:4] 1 1 1 1 1 1 0 1 1 1 ...
-    ##   ..$ image          : num [1:7421, 1:24] 0 0 0 0 0 0 0 0 0 0 ...
-    ##   ..$ classifications: num [1:7421] 0 0 0 0 0 0 1 0 0 0 ...
-    ##   ..$ toxicity       : num [1:7421] 0 0 0.358 0 1.372 ...
-    ##   ..$ locations      : chr [1:7421] "PSP15.25" "PSP24.08" "PSP16.41" "PSP14.17" ...
-    ##   ..$ dates          : num [1:7421] 18436 18841 19165 17316 18470 ...
-    ##   ..$ scaling_factors: NULL
-    ##  $ test :List of 7
-    ##   ..$ labels         : num [1:341, 1:4] 1 0 0 1 1 1 1 0 1 1 ...
-    ##   ..$ image          : num [1:341, 1:24] 0 0 0 0 0.377 ...
-    ##   ..$ classifications: num [1:341] 0 2 1 0 0 0 0 1 0 0 ...
-    ##   ..$ toxicity       : num [1:341] 7.33 71.69 12.76 5.69 4.67 ...
-    ##   ..$ locations      : chr [1:341] "PSP15.25" "PSP11.115" "PSP10.145" "PSP12.28" ...
-    ##   ..$ dates          : num [1:341] 19913 19856 19898 19904 19905 ...
-    ##   ..$ scaling_factors: NULL
-
-### Model training and prediction
-
-``` r
-model <- forecast_model(cfg, model_input, forecast_mode=FALSE)
-```
-
-### Make a forecast list
-
-Combine all of the predictions the model made into a table with their
-metadata
-
-``` r
-forecast_list <- make_forecast_list(cfg, model$forecast, forecast_mode = FALSE)
-  
-forecast_list
-```
-
-    ## # A tibble: 341 × 13
-    ## # Rowwise: 
-    ##    version location  date       class_bins forecast_start_date forecast_end_date
-    ##    <chr>   <chr>     <date>     <chr>      <date>              <date>           
-    ##  1 v0.3.1  PSP15.25  2024-07-09 0,10,30,80 2024-07-13          2024-07-19       
-    ##  2 v0.3.1  PSP11.115 2024-05-13 0,10,30,80 2024-05-17          2024-05-23       
-    ##  3 v0.3.1  PSP10.145 2024-06-24 0,10,30,80 2024-06-28          2024-07-04       
-    ##  4 v0.3.1  PSP12.28  2024-06-30 0,10,30,80 2024-07-04          2024-07-10       
-    ##  5 v0.3.1  PSP10.2   2024-07-01 0,10,30,80 2024-07-05          2024-07-11       
-    ##  6 v0.3.1  PSP11.17  2024-05-29 0,10,30,80 2024-06-02          2024-06-08       
-    ##  7 v0.3.1  PSP12.003 2024-07-15 0,10,30,80 2024-07-19          2024-07-25       
-    ##  8 v0.3.1  PSP10.33  2024-06-24 0,10,30,80 2024-06-28          2024-07-04       
-    ##  9 v0.3.1  PSP24.08  2024-05-27 0,10,30,80 2024-05-31          2024-06-06       
-    ## 10 v0.3.1  PSP25.06  2024-05-21 0,10,30,80 2024-05-25          2024-05-31       
-    ## # ℹ 331 more rows
-    ## # ℹ 7 more variables: actual_class <dbl>, actual_toxicity <dbl>, prob_0 <dbl>,
-    ## #   prob_1 <dbl>, prob_2 <dbl>, prob_3 <dbl>, predicted_class <dbl>
-
-### Model skill
-
-``` r
-metrics = forecast_metrics(forecast_list)
-
-metrics
-```
-
-    ## # A tibble: 1 × 10
-    ##      tp    fp    tn    fn accuracy cl_accuracy   f_1 precision sensitivity
-    ##   <int> <int> <int> <int>    <dbl>       <dbl> <dbl>     <dbl>       <dbl>
-    ## 1     2     3   329     7    0.716       0.971 0.286       0.4       0.222
-    ## # ℹ 1 more variable: specificity <dbl>
-
-A confusion matrix can help to visualize multiclass acurracy
-
-``` r
-make_confusion_matrix(cfg, forecast_list)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
