@@ -4,13 +4,15 @@
 #' @param input_data a tibble of raw input data (psp measurements, environmental data)
 #' @param n_runs integer of times to run the model for the test
 #' @param write_results logical if true then results/metrics get appended to results files
+#' @param model_fun character string defining which predictive model function to use
 #' @return a list containing predictions, metrics and plots
 #' 
 #' @export
 run_ensemble_test <- function(cfg, 
                               input_data, 
                               n_runs, 
-                              write_results=FALSE) {
+                              write_results=FALSE,
+                              model_fun = "forecast_model") {
   
   run_metrics <- dplyr::tibble()
   all_predictions <- dplyr::tibble()
@@ -19,7 +21,7 @@ run_ensemble_test <- function(cfg,
   
   for (i in 1:n_runs) {
     
-    test <- train_and_predict(cfg, model_input, forecast_mode=FALSE)
+    test <- train_and_predict(cfg, model_input, forecast_mode=FALSE, model_fun=model_fun)
     
     run_metrics <- run_metrics |> 
       dplyr::bind_rows(test$metrics)

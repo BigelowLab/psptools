@@ -3,13 +3,15 @@
 #' @param cfg a list containing model configuration arguments
 #' @param model_input a model_input object containing lists for train and test sets
 #' @param forecast_mode logical to define if testing on historical data or predicting in real-time
+#' @param model_fun character string defining which predictive model function to use
 #' @return a tibble of predictions in forecast_list format along with metrics if testing
 #' @export
 train_and_predict <- function(cfg, 
                               model_input,
-                              forecast_mode) {
-  
-  model <- forecast_model(cfg, model_input, forecast_mode=forecast_mode)
+                              forecast_mode,
+                              model_fun = "forecast_model") {
+  model_fun = get(model_fun)
+  model <- model_fun(cfg, model_input, forecast_mode=forecast_mode)
   
   forecast_list <- make_forecast_list(cfg, model$forecast, forecast_mode=forecast_mode)
   

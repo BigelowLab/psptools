@@ -4,7 +4,13 @@
 \alias{run_ensemble_test}
 \title{Runs a model configuration n times and produces metrics/plots of results}
 \usage{
-run_ensemble_test(cfg, input_data, n_runs, write_results = FALSE)
+run_ensemble_test(
+  cfg,
+  input_data,
+  n_runs,
+  write_results = FALSE,
+  model_fun = "forecast_model"
+)
 }
 \arguments{
 \item{cfg}{a list containing configuration params}
@@ -14,6 +20,8 @@ run_ensemble_test(cfg, input_data, n_runs, write_results = FALSE)
 \item{n_runs}{integer of times to run the model for the test}
 
 \item{write_results}{logical if true then results/metrics get appended to results files}
+
+\item{model_fun}{character string defining which predictive model function to use}
 }
 \value{
 a list containing predictions, metrics and plots

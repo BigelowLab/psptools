@@ -4,7 +4,12 @@
 \alias{train_and_predict}
 \title{Trains a forecast model and makes predictions}
 \usage{
-train_and_predict(cfg, model_input, forecast_mode)
+train_and_predict(
+  cfg,
+  model_input,
+  forecast_mode,
+  model_fun = "forecast_model"
+)
 }
 \arguments{
 \item{cfg}{a list containing model configuration arguments}
@@ -12,6 +17,8 @@ train_and_predict(cfg, model_input, forecast_mode)
 \item{model_input}{a model_input object containing lists for train and test sets}
 
 \item{forecast_mode}{logical to define if testing on historical data or predicting in real-time}
+
+\item{model_fun}{character string defining which predictive model function to use}
 }
 \value{
 a tibble of predictions in forecast_list format along with metrics if testing
