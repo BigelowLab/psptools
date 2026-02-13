@@ -29,10 +29,10 @@ cfg <- list(
   train_test = list(split_by = "year_region_species",
                     train = list(species = "mytilus",
                                  region = "maine",
-                                 year=c("2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023")), 
+                                 year=c("2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024")), 
                     test = list(species = "mytilus",
                                 region = "maine",
-                                year = c("2024")))
+                                year = c("2025")))
 )
 
 

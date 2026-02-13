@@ -23,5 +23,6 @@ Imports:
   abind,
   ggplot2,
   stats,
-  readr
+  readr,
+  yardstick
 RoxygenNote: 7.3.2

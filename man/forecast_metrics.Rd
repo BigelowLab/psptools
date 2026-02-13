@@ -2,13 +2,13 @@
 % Please edit documentation in R/forecast_metrics.R
 \name{forecast_metrics}
 \alias{forecast_metrics}
-\title{Finds metrics from a table of forecast predictions (usually the output of `make_forecast_list()`)}
+\title{Finds metrics from a table of forecast predictions}
 \usage{
 forecast_metrics(
   fc,
   predicted_col = "predicted_class",
   measured_col = "actual_class",
-  closure_class = 3
+  positive_col = "prob_3"
 )
 }
 \arguments{
@@ -18,8 +18,11 @@ forecast_metrics(
 
 \item{measured_col}{character string of measured classification column}
 
-\item{closure_class}{integer defining closure-level class (usually 3, but 1 in case of binary predictions)}
+\item{positive_col}{character stirng of positive (closure-level) class column}
+}
+\value{
+one row tibble of metrics
 }
 \description{
-Finds metrics from a table of forecast predictions (usually the output of `make_forecast_list()`)
+Finds metrics from a table of forecast predictions
 }

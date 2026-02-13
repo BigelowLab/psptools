@@ -10,7 +10,7 @@
 #' @export
 run_ensemble_test <- function(cfg, 
                               input_data, 
-                              n_runs, 
+                              n_runs = 3, 
                               write_results=FALSE,
                               model_fun = "forecast_model") {
   
@@ -67,7 +67,7 @@ run_ensemble_test <- function(cfg,
     readr::write_csv(ensemble_forecast$metrics, "ensemble_test_results.csv.gz", append=TRUE)
   }
   
-  ensemble_metrics <- forecast_metrics(ensemble_forecast)
+  ensemble_metrics <- forecast_metrics(ensemble_forecast, positive_col = "p_3")
   
   z <- list(all_predictions = all_predictions,
             ensemble_predictions = ensemble_predictions,

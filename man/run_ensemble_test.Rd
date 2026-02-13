@@ -7,7 +7,7 @@
 run_ensemble_test(
   cfg,
   input_data,
-  n_runs,
+  n_runs = 3,
   write_results = FALSE,
   model_fun = "forecast_model"
 )
