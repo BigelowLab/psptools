@@ -48,6 +48,10 @@ pool_images_and_labels <- function(image_list_subset,
     aperm(c(3, 1, 2)) |> 
     keras::array_reshape(c(length(xx), prod(dim_image)))
   
+  image2 <- abind::abind(images, along = 3) |> 
+    aperm(c(3, 1, 2)) |>
+    matrix(nrow = length(xx), ncol = prod(dim_image), byrow = TRUE)
+  
   image <- image |> 
     replace_na(missing_value = missing_value)
   
