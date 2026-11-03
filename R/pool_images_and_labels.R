@@ -48,9 +48,9 @@ pool_images_and_labels <- function(image_list_subset,
     aperm(c(3, 1, 2)) |> 
     keras::array_reshape(c(length(xx), prod(dim_image)))
   
-  image2 <- abind::abind(images, along = 3) |> 
-    aperm(c(3, 1, 2)) |>
-    matrix(nrow = length(xx), ncol = prod(dim_image), byrow = TRUE)
+  #image2 <- abind::abind(images, along = 3) |> 
+  #  aperm(c(3, 1, 2)) |>
+  #  matrix(nrow = length(xx), ncol = prod(dim_image), byrow = TRUE)
   
   image <- image |> 
     replace_na(missing_value = missing_value)
@@ -99,6 +99,7 @@ pool_images_and_labels <- function(image_list_subset,
 #' @param x 2D array image object 
 #' @param missing_value integer to replace NA toxin levels with
 #' @return x
+#' @export
 replace_na <- function(x, missing_value = -1) {
   x[is.na(x)] <- missing_value
   return(x)
